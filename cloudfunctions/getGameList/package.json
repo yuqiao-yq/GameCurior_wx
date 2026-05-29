@@ -1,0 +1,9 @@
+{
+  "name": "getGameList",
+  "version": "1.0.0",
+  "description": "获取游戏列表，支持分页、分类筛选、排序",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

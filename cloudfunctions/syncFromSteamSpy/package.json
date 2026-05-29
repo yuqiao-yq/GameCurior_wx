@@ -1,0 +1,9 @@
+{
+  "name": "syncFromSteamSpy",
+  "version": "1.0.0",
+  "description": "从 SteamSpy 同步热门游戏的销量与评分（免 API Key）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

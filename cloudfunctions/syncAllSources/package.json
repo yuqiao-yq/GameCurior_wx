@@ -1,0 +1,9 @@
+{
+  "name": "syncAllSources",
+  "version": "1.0.0",
+  "description": "一键调度所有数据源同步（initGames → SteamSpy → CheapShark → RAWG）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "GameCurior",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {}
+}

@@ -1,0 +1,20 @@
+# 微信开发者工具
+.DS_Store
+node_modules/
+miniprogram_npm/
+
+# 云函数依赖（部署时云端安装）
+cloudfunctions/**/node_modules/
+
+# 项目私有配置（如需共享则去掉本行）
+# project.private.config.json
+
+# 日志
+*.log
+npm-debug.log*
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo

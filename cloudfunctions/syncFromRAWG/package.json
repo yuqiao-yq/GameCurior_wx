@@ -1,0 +1,9 @@
+{
+  "name": "syncFromRAWG",
+  "version": "1.0.0",
+  "description": "从 RAWG.io 同步详细游戏信息（截图、视频、标签、评分）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

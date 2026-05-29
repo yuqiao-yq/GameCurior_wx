@@ -1,0 +1,9 @@
+{
+  "name": "syncFromCheapShark",
+  "version": "1.0.0",
+  "description": "从 CheapShark 同步全平台游戏打折信息（免 API Key）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,77 @@
+<!--pages/index/index.wxml-->
+<view class="page">
+  <!-- 顶部 Hero 区域 -->
+  <view class="hero">
+    <view class="hero__badge">Beta</view>
+    <view class="hero__title">{{ appName }}</view>
+    <view class="hero__slogan">{{ slogan }}</view>
+
+    <button class="hero__btn" bindtap="handlePrimaryTap" hover-class="hero__btn--hover">
+      立即开始
+    </button>
+
+    <view wx:if="{{ openid }}" class="hero__openid">openid: {{ openid }}</view>
+  </view>
+
+  <!-- 功能卡片 -->
+  <view class="features">
+    <view
+      class="feature-card"
+      wx:for="{{ features }}"
+      wx:key="title"
+      data-index="{{ index }}"
+      bindtap="handleFeatureTap"
+      hover-class="feature-card--hover"
+    >
+      <view class="feature-card__icon">{{ item.icon }}</view>
+      <view class="feature-card__content">
+        <view class="feature-card__title">{{ item.title }}</view>
+        <view class="feature-card__desc">{{ item.desc }}</view>
+      </view>
+      <view class="feature-card__arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 游戏列表（来自云函数） -->
+  <view class="section">
+    <view class="section__header">
+      <view class="section__title">编辑精选</view>
+      <view wx:if="{{ isMock }}" class="section__tag">演示数据</view>
+    </view>
+
+    <view wx:if="{{ loading }}" class="loading">加载中...</view>
+
+    <view wx:elif="{{ games.length === 0 }}" class="empty">
+      暂无数据，请先在云开发控制台录入游戏
+    </view>
+
+    <view wx:else class="game-list">
+      <view
+        class="game-card"
+        wx:for="{{ games }}"
+        wx:key="_id"
+        data-game="{{ item }}"
+        bindtap="handleGameTap"
+        hover-class="game-card--hover"
+      >
+        <image class="game-card__cover" src="{{ item.cover }}" mode="aspectFill" lazy-load />
+        <view class="game-card__body">
+          <view class="game-card__title">{{ item.name }}</view>
+          <view class="game-card__desc">{{ item.description }}</view>
+          <view class="game-card__meta">
+            <view class="game-card__rating">⭐ {{ item.rating }}</view>
+            <view class="game-card__price" wx:if="{{ item.price }}">¥{{ item.price }}</view>
+          </view>
+          <view class="game-card__tags">
+            <text class="tag" wx:for="{{ item.tags }}" wx:for-item="tag" wx:key="*this">{{ tag }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer">
+    <text>— 已接入微信云开发，欢迎探索 —</text>
+  </view>
+</view>

@@ -1,0 +1,257 @@
+/* pages/index/index.wxss */
+.page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+/* Hero 区域 */
+.hero {
+  position: relative;
+  padding: 80rpx 40rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  box-shadow: 0 12rpx 32rpx rgba(102, 126, 234, 0.25);
+}
+
+.hero__badge {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  font-size: 22rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: 24rpx;
+}
+
+.hero__title {
+  font-size: 60rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  margin-bottom: 16rpx;
+}
+
+.hero__slogan {
+  font-size: 28rpx;
+  opacity: 0.85;
+  margin-bottom: 48rpx;
+}
+
+.hero__btn {
+  width: 240rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #5b3aa8;
+  background: #ffffff;
+  border-radius: 40rpx;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.hero__btn::after {
+  border: none;
+}
+
+.hero__btn--hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.hero__openid {
+  margin-top: 32rpx;
+  font-size: 20rpx;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+/* 功能卡片列表 */
+.features {
+  margin-top: 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.feature-card {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+  transition: transform 0.15s ease;
+}
+
+.feature-card--hover {
+  transform: scale(0.98);
+  background: #fafbff;
+}
+
+.feature-card__icon {
+  width: 88rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 44rpx;
+  background: #f2f4ff;
+  border-radius: 20rpx;
+  margin-right: 24rpx;
+}
+
+.feature-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.feature-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+}
+
+.feature-card__desc {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.feature-card__arrow {
+  font-size: 40rpx;
+  color: #c9cdd4;
+  margin-left: 16rpx;
+}
+
+/* 区块 */
+.section {
+  margin-top: 56rpx;
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section__title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.section__tag {
+  margin-left: 16rpx;
+  padding: 4rpx 16rpx;
+  font-size: 20rpx;
+  color: #ff7d00;
+  background: #fff7e6;
+  border-radius: 16rpx;
+}
+
+.loading,
+.empty {
+  padding: 60rpx 0;
+  text-align: center;
+  color: #86909c;
+  font-size: 26rpx;
+}
+
+/* 游戏卡片 */
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.game-card {
+  display: flex;
+  background: #ffffff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.game-card--hover {
+  transform: scale(0.98);
+}
+
+.game-card__cover {
+  width: 200rpx;
+  height: 240rpx;
+  background: #f2f3f5;
+  flex-shrink: 0;
+}
+
+.game-card__body {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.game-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-card__desc {
+  flex: 1;
+  font-size: 22rpx;
+  color: #86909c;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.game-card__meta {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.game-card__rating {
+  font-size: 24rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.game-card__price {
+  margin-left: auto;
+  font-size: 26rpx;
+  color: #f53f3f;
+  font-weight: 600;
+}
+
+.game-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.tag {
+  padding: 2rpx 12rpx;
+  font-size: 20rpx;
+  color: #5b3aa8;
+  background: #f2f4ff;
+  border-radius: 12rpx;
+}
+
+/* 底部 */
+.footer {
+  margin-top: 60rpx;
+  padding: 40rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: #a9aeb8;
+}
