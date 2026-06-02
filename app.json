@@ -97,6 +97,7 @@
   "usingComponents": {
     "privacy-popup": "/components/privacy-popup/privacy-popup",
     "skeleton": "/components/skeleton/skeleton",
-    "empty-state": "/components/empty-state/empty-state"
+    "empty-state": "/components/empty-state/empty-state",
+    "banner-swiper": "/components/banner-swiper/banner-swiper"
   }
 }

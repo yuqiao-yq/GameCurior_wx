@@ -11,10 +11,12 @@ Page({
       { icon: '🏷️', title: '游戏分类', desc: '按类型寻找好游戏', action: 'category' },
       { icon: '⭐', title: '我的收藏', desc: '收藏喜欢的游戏随时查看', action: 'favorites' },
     ],
-    games: [],     // 云函数返回的游戏列表
+    banners: [],     // 首页 banner 轮播
+    games: [],       // 云函数返回的游戏列表
     loading: true,
-    isMock: false, // 是否走 mock 数据
-    openid: '',    // 登录后的 openid
+    bannersLoading: true,
+    isMock: false,
+    openid: '',
   },
 
   onLoad() {
@@ -22,9 +24,31 @@ Page({
   },
 
   async loginAndFetch() {
-    // 并行执行登录和获取列表（互不依赖）
+    // 并行执行登录 + 拉游戏 + 拉 banner
     this.fetchGameList();
+    this.fetchHomeConfig();
     this.silentLogin();
+  },
+
+  /**
+   * 拉首页配置（banner + 热搜词等）
+   */
+  async fetchHomeConfig() {
+    this.setData({ bannersLoading: true });
+    try {
+      const data = await cloud.callFunction(
+        'getHomeConfig',
+        { includeBanners: true, includeHotKeywords: false },
+        { showError: false }
+      );
+      this.setData({
+        banners: data.banners || [],
+        bannersLoading: false,
+      });
+    } catch (err) {
+      console.warn('fetchHomeConfig fail:', err);
+      this.setData({ bannersLoading: false });
+    }
   },
 
   /**
@@ -66,7 +90,8 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.fetchGameList().finally(() => wx.stopPullDownRefresh());
+    Promise.all([this.fetchGameList(), this.fetchHomeConfig()])
+      .finally(() => wx.stopPullDownRefresh());
   },
 
   onShareAppMessage() {

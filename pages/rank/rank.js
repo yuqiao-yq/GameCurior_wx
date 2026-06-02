@@ -27,7 +27,37 @@ Page({
   },
 
   onLoad() {
-    this.fetchTab(0, { reset: true });
+    // 检查 banner 传过来的预选 tab key
+    const preselectKey = this.consumePreselect();
+    const initIdx = preselectKey
+      ? TABS.findIndex((t) => t.key === preselectKey)
+      : 0;
+    const activeTab = initIdx >= 0 ? initIdx : 0;
+    this.setData({ activeTab });
+    this.fetchTab(activeTab, { reset: true });
+  },
+
+  onShow() {
+    // 从 banner 切换过来时（switchTab 不触发 onLoad），也要响应预选
+    const preselectKey = this.consumePreselect();
+    if (!preselectKey) return;
+    const idx = TABS.findIndex((t) => t.key === preselectKey);
+    if (idx >= 0 && idx !== this.data.activeTab) {
+      this.setData({ activeTab: idx });
+      const state = this.data.tabStates[idx];
+      if (!state.inited) this.fetchTab(idx, { reset: true });
+    }
+  },
+
+  // 读取并清除"预选 tab"标记（由 banner-swiper 写入）
+  consumePreselect() {
+    try {
+      const key = wx.getStorageSync('rank:preselect');
+      if (key) wx.removeStorageSync('rank:preselect');
+      return key;
+    } catch (e) {
+      return '';
+    }
   },
 
   // 切换 tab：若该 tab 还没数据，立刻拉一次

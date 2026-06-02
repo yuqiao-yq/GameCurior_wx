@@ -1,0 +1,42 @@
+<!--components/banner-swiper/banner-swiper.wxml-->
+<view wx:if="{{ banners && banners.length > 0 }}" class="banner {{ rounded ? 'banner--rounded' : '' }}">
+  <swiper
+    class="banner__swiper"
+    autoplay="{{ autoplay }}"
+    interval="{{ interval }}"
+    duration="{{ duration }}"
+    circular="{{ banners.length > 1 }}"
+    indicator-dots="{{ banners.length > 1 }}"
+    indicator-color="rgba(255, 255, 255, 0.4)"
+    indicator-active-color="#ffffff"
+  >
+    <swiper-item
+      wx:for="{{ banners }}"
+      wx:key="_id"
+      data-item="{{ item }}"
+      bindtap="handleTap"
+    >
+      <view
+        class="banner__slide"
+        style="{{ item.gradient ? 'background:' + item.gradient : (item.bgColor ? 'background:' + item.bgColor : '') }}"
+      >
+        <!-- 背景图（可选） -->
+        <image
+          wx:if="{{ item.image }}"
+          class="banner__bg"
+          src="{{ item.image }}"
+          mode="aspectFill"
+          lazy-load
+          binderror="handleImageError"
+        />
+        <view wx:if="{{ item.image }}" class="banner__mask"></view>
+
+        <!-- 文案 -->
+        <view class="banner__content">
+          <view class="banner__title">{{ item.title }}</view>
+          <view wx:if="{{ item.subtitle }}" class="banner__subtitle">{{ item.subtitle }}</view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+</view>

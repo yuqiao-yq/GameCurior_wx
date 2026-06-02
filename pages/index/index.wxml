@@ -8,6 +8,13 @@
     <text class="search-bar__placeholder">搜索游戏、标签…</text>
   </view>
 
+  <!-- 首页 Banner 轮播 -->
+  <view wx:if="{{ banners.length > 0 }}" class="banner-wrap">
+    <banner-swiper banners="{{ banners }}" />
+  </view>
+  <!-- banner loading 占位（避免布局抖动） -->
+  <view wx:elif="{{ bannersLoading }}" class="banner-wrap banner-wrap--skeleton"></view>
+
   <!-- 顶部 Hero 区域 -->
   <view class="hero">
     <view class="hero__badge">Beta</view>

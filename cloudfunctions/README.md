@@ -10,6 +10,7 @@
 |---|---|---|
 | [`login/`](./login) | 微信登录，自动建档 | 小程序前端调用 |
 | [`userProfile/`](./userProfile) | 用户资料 get/update（昵称变更走内容安全审核） | 小程序前端调用 |
+| [`getHomeConfig/`](./getHomeConfig) | 首页配置聚合（banners + hotKeywords + featured，含 mock 兜底） | 小程序前端调用 |
 | [`getGameList/`](./getGameList) | 首页游戏列表（含 mock 兜底，支持 rating/new/hot/discount/sales 排序） | 小程序前端调用 |
 | [`getGameDetail/`](./getGameDetail) | 游戏详情 + 浏览历史上报 + 相关推荐 | 小程序前端调用 |
 | [`searchGames/`](./searchGames) | 搜索游戏（search/hot/suggest，含 includeExternal=true 调 CheapShark） | 小程序前端调用 |
@@ -23,10 +24,54 @@
 | 函数 | 数据源 | 是否需 Key | 用途 |
 |---|---|---|---|
 | [`initGames/`](./initGames) | 内置种子 | ❌ | 一键导入 25 款精选中文游戏 |
+| [`initBanners/`](./initBanners) | 内置种子 | ❌ | 一键导入 4 条示例首页 banner（榜单跳转入口） |
 | [`syncFromSteamSpy/`](./syncFromSteamSpy) | [SteamSpy](https://steamspy.com/api.php) | ❌ | 拉取 Steam 热门游戏（销量、评分） |
 | [`syncFromCheapShark/`](./syncFromCheapShark) | [CheapShark](https://apidocs.cheapshark.com) | ❌ | 实时打折信息 |
 | [`syncFromRAWG/`](./syncFromRAWG) | [RAWG.io](https://rawg.io/apidocs) | ✅ 免费 | 截图、视频、标签、详细元数据 |
 | [`syncAllSources/`](./syncAllSources) | 全部 | - | **一键聚合调度** |
+
+---
+
+### 🎨 首页 Banner 运营指南
+
+[`banners`](https://docs.cloudbase.net/cms/database/intro) 集合用于驱动首页轮播运营位，控制台可直接编辑：
+
+#### Schema
+
+```js
+{
+  title: '夏日特惠',         // 主标题（白色大字）
+  subtitle: '热门游戏低至 3 折', // 副标题（可选）
+  image: 'https://...',     // 背景图（可选，无图则用 bgColor/gradient）
+  bgColor: '#ff7d00',       // 纯色背景兜底
+  gradient: 'linear-gradient(135deg, #667eea 0%, #5b3aa8 100%)', // 渐变（优先级最高）
+  linkType: 'rank',          // game/rank/category/list/search/external/none
+  linkValue: 'hot',          // linkType 对应的值
+  sort: 1,                   // 排序，越小越靠前
+  status: 1,                 // 0=下架, 1=上线
+  startAt: Date,             // 生效时间（可选）
+  endAt: Date,               // 失效时间（可选）
+}
+```
+
+#### linkType 跳转行为
+
+| linkType | linkValue 示例 | 跳转行为 |
+|---|---|---|
+| `game` | `gameId123` | 跳转游戏详情页 |
+| `rank` | `hot` / `new` / `rating` / `discount` | 切到榜单 Tab 并预选对应子榜 |
+| `category` | （任意） | 切到分类页 |
+| `list` | `cat_action` | 跳到该分类的游戏列表 |
+| `search` | `Roguelike` | 跳到该关键词的搜索结果页 |
+| `external` | `https://...` | 复制链接到剪贴板（小程序限制无法直接打开外链） |
+| `none` | - | 不响应（纯展示） |
+
+#### 快速上手
+
+1. 部署 [`initBanners`](./initBanners) 云函数 + 创建 `banners` 集合（权限：所有用户可读，仅管理端可写）
+2. 控制台 → 云函数 → `initBanners` → 云端测试 → 调用（无参数）
+3. 4 条示例 banner 自动写入，刷新小程序首页即可看到轮播
+4. 后续在控制台 `banners` 集合可视化编辑即可（无需改代码）
 
 ---
 
@@ -43,6 +88,7 @@
 ```bash
 cd cloudfunctions/login && npm install
 cd cloudfunctions/userProfile && npm install
+cd cloudfunctions/getHomeConfig && npm install
 cd cloudfunctions/getGameList && npm install
 cd cloudfunctions/getGameDetail && npm install
 cd cloudfunctions/searchGames && npm install
@@ -50,6 +96,7 @@ cd cloudfunctions/importGame && npm install
 cd cloudfunctions/favorite && npm install
 cd cloudfunctions/history && npm install
 cd cloudfunctions/contentCheck && npm install
+cd cloudfunctions/initBanners && npm install
 cd cloudfunctions/initGames && npm install
 cd cloudfunctions/syncFromSteamSpy && npm install
 cd cloudfunctions/syncFromCheapShark && npm install

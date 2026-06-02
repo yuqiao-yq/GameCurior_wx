@@ -1,0 +1,9 @@
+{
+  "name": "getHomeConfig",
+  "version": "1.0.0",
+  "description": "首页配置聚合：banners + hotKeywords + featured，含 mock 兜底",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
