@@ -4,13 +4,6 @@ const app = getApp();
 
 Page({
   data: {
-    appName: 'GameCurior',
-    slogan: '发现你感兴趣的好玩游戏',
-    features: [
-      { icon: '🔥', title: '热门榜单', desc: '查看当下最热门的作品', action: 'rank' },
-      { icon: '🏷️', title: '游戏分类', desc: '按类型寻找好游戏', action: 'category' },
-      { icon: '⭐', title: '我的收藏', desc: '收藏喜欢的游戏随时查看', action: 'favorites' },
-    ],
     banners: [],     // 首页 banner 轮播
     games: [],       // 云函数返回的游戏列表
     loading: true,
@@ -101,38 +94,9 @@ Page({
     };
   },
 
-  handleFeatureTap(e) {
-    const { index } = e.currentTarget.dataset;
-    const item = this.data.features[index];
-
-    // 路由分发：TabBar 页面用 switchTab，普通页面用 navigateTo
-    switch (item.action) {
-      case 'rank':
-        wx.switchTab({ url: '/pages/rank/rank' });
-        break;
-      case 'category':
-        wx.switchTab({ url: '/pages/category/category' });
-        break;
-      case 'favorites':
-        wx.navigateTo({ url: '/pages/mine/favorites/favorites' });
-        break;
-      default:
-        wx.showToast({ title: `${item.title} 功能开发中`, icon: 'none' });
-    }
-  },
-
   handleSearchTap() {
     wx.navigateTo({ url: '/pages/search/search' });
   },
-
-  handlePrimaryTap() {
-    wx.showToast({
-      title: '开始探索吧！',
-      icon: 'success',
-    });
-  },
-
-
 
   handleGameTap(e) {
     const { game } = e.currentTarget.dataset;

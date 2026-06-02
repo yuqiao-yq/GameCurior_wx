@@ -17,61 +17,6 @@
   opacity: 0.5;
 }
 
-/* Hero 区域 */
-.hero {
-  position: relative;
-  padding: 80rpx 40rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
-  box-shadow: 0 12rpx 32rpx rgba(102, 126, 234, 0.25);
-}
-
-.hero__badge {
-  display: inline-block;
-  padding: 4rpx 16rpx;
-  font-size: 22rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.2);
-  margin-bottom: 24rpx;
-}
-
-.hero__title {
-  font-size: 60rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  margin-bottom: 16rpx;
-}
-
-.hero__slogan {
-  font-size: 28rpx;
-  opacity: 0.85;
-  margin-bottom: 48rpx;
-}
-
-.hero__btn {
-  width: 240rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #5b3aa8;
-  background: #ffffff;
-  border-radius: 40rpx;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-.hero__btn::after {
-  border: none;
-}
-
-.hero__btn--hover {
-  opacity: 0.85;
-  transform: scale(0.98);
-}
-
 /* ============ 顶部搜索框 ============ */
 .search-bar {
   display: flex;
@@ -98,66 +43,9 @@
   color: #a9aeb8;
 }
 
-/* 功能卡片列表 */
-.features {
-  margin-top: 40rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.feature-card {
-  display: flex;
-  align-items: center;
-  padding: 32rpx;
-  background: #ffffff;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
-  transition: transform 0.15s ease;
-}
-
-.feature-card--hover {
-  transform: scale(0.98);
-  background: #fafbff;
-}
-
-.feature-card__icon {
-  width: 88rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  font-size: 44rpx;
-  background: #f2f4ff;
-  border-radius: 20rpx;
-  margin-right: 24rpx;
-}
-
-.feature-card__content {
-  flex: 1;
-  min-width: 0;
-}
-
-.feature-card__title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #1f2329;
-  margin-bottom: 8rpx;
-}
-
-.feature-card__desc {
-  font-size: 24rpx;
-  color: #86909c;
-}
-
-.feature-card__arrow {
-  font-size: 40rpx;
-  color: #c9cdd4;
-  margin-left: 16rpx;
-}
-
 /* 区块 */
 .section {
-  margin-top: 56rpx;
+  margin-top: 32rpx;
 }
 
 .section__header {
