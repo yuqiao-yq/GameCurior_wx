@@ -11,7 +11,15 @@ const gamesCol = db.collection('games');
 // ============ HTTP GET ============
 function httpGet(url, timeout = 15000) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { timeout }, (res) => {
+    const options = {
+      timeout,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    };
+    const req = https.get(url, options, (res) => {
       if (res.statusCode !== 200) {
         return reject(new Error(`HTTP ${res.statusCode}`));
       }

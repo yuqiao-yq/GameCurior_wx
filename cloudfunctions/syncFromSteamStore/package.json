@@ -1,0 +1,9 @@
+{
+  "name": "syncFromSteamStore",
+  "version": "1.0.0",
+  "description": "从 Steam 官方商店 API 拉取游戏详细信息（国内可访问，免 Key）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

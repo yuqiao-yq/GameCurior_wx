@@ -1,47 +1,33 @@
 // cloudfunctions/syncAllSources/index.js
-// 一键聚合所有数据源
-// 推荐执行顺序：
-//   1. initGames        → 写入中文化的种子数据（建立基线）
-//   2. syncFromSteamSpy → 拉热门，补全销量/评分/英文名
-//   3. syncFromRAWG     → 补全截图/视频/标签（耗 API 配额）
-//   4. syncFromCheapShark → 最后跑，覆盖实时价格
+// ⚠️ 云函数互调有 3 秒默认超时（SCF 限制）：
+//   - 同步等待 cloud.callFunction，超过 3 秒会被父函数判定为失败
+//   - 但子函数实际还在云端继续跑，最终能完成
 //
-// 也可以设置定时触发器（建议每天凌晨跑 CheapShark 即可）
+// 因此本函数采用「异步触发 + 立即返回」模式：
+//   - 触发所有子函数（fire-and-forget）
+//   - 立即返回触发列表
+//   - 实际结果请到各个子函数的「日志」标签查看
 const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const SYNC_PIPELINE = [
-  { name: 'initGames', params: {}, skipIfNotReady: false },
+  { name: 'initGames', params: {} },
+  // SteamSpy 被 Cloudflare 拦截腾讯云 IP，功能由 syncFromSteamStore 替代
   { name: 'syncFromSteamSpy', params: { request: 'top100in2weeks', limit: 30 } },
+  // CheapShark 提供实时打折信息
   { name: 'syncFromCheapShark', params: { storeID: '1', pageSize: 30, sortBy: 'Savings' } },
-  { name: 'syncFromRAWG', params: { mode: 'enrich', pageSize: 10 }, skipIfNotReady: true },
+  // SteamStore 是主力数据源，限制为 3 个 / 次，多跑几次能逐步覆盖
+  // 太大会让单个 sync 函数 60s 跑不完（每个 appid 最坏含重试要 30+s）
+  { name: 'syncFromSteamStore', params: { limit: 3, delayMs: 500 } },
+  // RAWG 需要 API Key，未配置时跳过
+  { name: 'syncFromRAWG', params: { mode: 'enrich', pageSize: 10 } },
 ];
 
-async function callSubFunction(name, data) {
-  const start = Date.now();
-  try {
-    const res = await cloud.callFunction({ name, data });
-    return {
-      name,
-      ok: true,
-      duration: Date.now() - start,
-      result: res.result,
-    };
-  } catch (err) {
-    return {
-      name,
-      ok: false,
-      duration: Date.now() - start,
-      error: err.message,
-    };
-  }
-}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 exports.main = async (event, context) => {
   const { only = [], skip = [] } = event;
-  // only: 仅执行指定的几个 ['initGames', 'syncFromCheapShark']
-  // skip: 跳过指定的几个
 
   const pipeline = SYNC_PIPELINE.filter((step) => {
     if (only.length > 0 && !only.includes(step.name)) return false;
@@ -49,31 +35,56 @@ exports.main = async (event, context) => {
     return true;
   });
 
-  const results = [];
-  for (const step of pipeline) {
-    console.log(`[syncAllSources] 开始 ${step.name}`);
-    const r = await callSubFunction(step.name, step.params);
-    results.push(r);
-    console.log(`[syncAllSources] 结束 ${step.name}，耗时 ${r.duration}ms`);
+  const triggered = [];
 
-    // RAWG 未配置 key 时不要阻塞流程
-    if (!r.ok && step.skipIfNotReady) {
-      console.warn(`[syncAllSources] ${step.name} 跳过：`, r.error);
+  for (const step of pipeline) {
+    console.log(`[syncAllSources] 异步触发 ${step.name}`, JSON.stringify(step.params));
+    try {
+      // 关键：不 await，立即触发；用 .then/.catch 记录最终结果到日志
+      cloud
+        .callFunction({ name: step.name, data: step.params })
+        .then((r) => {
+          console.log(
+            `[syncAllSources] [${step.name}] 已完成:`,
+            JSON.stringify(r.result || r).slice(0, 500)
+          );
+        })
+        .catch((e) => {
+          // ESOCKETTIMEDOUT 是预期内的（云函数互调 3 秒限制），不算错误
+          // 子函数实际还在执行
+          if (e.message && (e.message.includes('TIMED') || e.message.includes('timed out'))) {
+            console.log(`[syncAllSources] [${step.name}] 父函数超时返回（子函数仍在执行）`);
+          } else {
+            console.warn(`[syncAllSources] [${step.name}] 触发失败:`, e.message);
+          }
+        });
+
+      triggered.push({
+        name: step.name,
+        status: 'triggered',
+        params: step.params,
+      });
+
+      // 间隔 800ms 避免同时启动多个云函数（限并发）
+      await sleep(800);
+    } catch (err) {
+      console.error(`[syncAllSources] [${step.name}] 同步触发异常:`, err.message);
+      triggered.push({
+        name: step.name,
+        status: 'error',
+        error: err.message,
+      });
     }
   }
 
-  const summary = {
-    total: results.length,
-    success: results.filter((r) => r.ok).length,
-    failed: results.filter((r) => !r.ok).length,
-  };
-
   return {
     code: 0,
-    message: 'ok',
+    message: '所有任务已异步触发，请到各云函数「日志」标签查看实际执行结果',
     data: {
-      summary,
-      results,
+      total: triggered.length,
+      triggered,
+      hint: '云函数互调有 3 秒同步超时（SCF 限制），故采用异步触发模式。如需查看每个 sync 的详细结果，请进入「云函数 → 选中 → 日志」查看。',
+      checkAfter: '1-2 分钟后',
     },
   };
 };

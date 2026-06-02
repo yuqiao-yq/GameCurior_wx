@@ -1,0 +1,9 @@
+{
+  "name": "favorite",
+  "version": "1.0.0",
+  "description": "收藏 CRUD：add / remove / list / updateStatus",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

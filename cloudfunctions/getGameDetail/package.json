@@ -1,0 +1,9 @@
+{
+  "name": "getGameDetail",
+  "version": "1.0.0",
+  "description": "获取游戏详情 + 上报浏览历史 + 返回是否已收藏",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
