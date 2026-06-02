@@ -1,4 +1,11 @@
 <!--pages/mine/lists/detail/detail.wxml-->
+<!-- 离屏 Canvas（用于生成分享图） -->
+<canvas
+  type="2d"
+  id="share-canvas"
+  class="share-canvas"
+></canvas>
+
 <view class="page">
   <skeleton wx:if="{{ loading && !list }}" type="detail" />
 

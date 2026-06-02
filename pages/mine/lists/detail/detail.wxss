@@ -1,4 +1,16 @@
 /* pages/mine/lists/detail/detail.wxss */
+
+/* 离屏 Canvas：固定移出可视区，但要有实际尺寸（Canvas 2D 需要） */
+.share-canvas {
+  position: fixed;
+  top: -10000rpx;
+  left: 0;
+  width: 750px;
+  height: 5000px;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .page {
   min-height: 100vh;
   background: #f6f7fb;
