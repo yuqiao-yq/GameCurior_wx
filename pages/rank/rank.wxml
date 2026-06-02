@@ -22,17 +22,20 @@
   <!-- 当前榜单内容 -->
   <block wx:for="{{ tabs }}" wx:for-item="tab" wx:for-index="tabIdx" wx:key="key">
     <view wx:if="{{ activeTab === tabIdx }}">
-      <!-- 首次加载 -->
-      <view wx:if="{{ !tabStates[tabIdx].inited && tabStates[tabIdx].loading }}" class="loading">
-        加载中…
-      </view>
+      <!-- 首次加载：骨架屏 -->
+      <skeleton
+        wx:if="{{ !tabStates[tabIdx].inited && tabStates[tabIdx].loading }}"
+        type="list"
+        count="5"
+      />
 
       <!-- 空态 -->
-      <view wx:elif="{{ tabStates[tabIdx].inited && tabStates[tabIdx].list.length === 0 }}" class="empty">
-        <view class="empty__icon">📭</view>
-        <view class="empty__text">榜单还在生成中</view>
-        <view class="empty__hint">请在云开发控制台同步游戏数据</view>
-      </view>
+      <empty-state
+        wx:elif="{{ tabStates[tabIdx].inited && tabStates[tabIdx].list.length === 0 }}"
+        type="empty"
+        title="榜单还在生成中"
+        desc="请在云开发控制台同步游戏数据"
+      />
 
       <!-- 列表 -->
       <view wx:else class="rank-list">

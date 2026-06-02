@@ -21,17 +21,16 @@
     </view>
   </view>
 
-  <!-- 加载中（首次） -->
-  <view wx:if="{{ !inited && loading }}" class="loading">
-    搜索中…
-  </view>
+  <!-- 加载中（首次）：骨架屏 -->
+  <skeleton wx:if="{{ !inited && loading }}" type="list" count="4" />
 
   <!-- 空态（本地 + 外部都没有） -->
-  <view wx:elif="{{ inited && list.length === 0 && external.length === 0 }}" class="empty">
-    <view class="empty__icon">🔍</view>
-    <view class="empty__title">没有找到「{{ keyword }}」相关游戏</view>
-    <view class="empty__desc">换个关键词试试，或浏览推荐分类</view>
-  </view>
+  <empty-state
+    wx:elif="{{ inited && list.length === 0 && external.length === 0 }}"
+    type="no-result"
+    title="没有找到「{{ keyword }}」相关游戏"
+    desc="换个关键词试试，或浏览推荐分类"
+  />
 
   <!-- 结果列表 -->
   <view wx:else>

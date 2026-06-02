@@ -4,16 +4,54 @@
     "pages/rank/rank",
     "pages/category/category",
     "pages/mine/mine",
-    "pages/game/detail/detail",
-    "pages/game/list/list",
     "pages/mine/favorites/favorites",
     "pages/mine/history/history",
-    "pages/mine/setting/setting",
-    "pages/legal/agreement/agreement",
-    "pages/legal/privacy/privacy",
-    "pages/search/search",
-    "pages/search/result/result"
+    "pages/mine/setting/setting"
   ],
+  "subPackages": [
+    {
+      "root": "pages/game/",
+      "name": "subpkg-game",
+      "pages": [
+        "detail/detail",
+        "list/list"
+      ]
+    },
+    {
+      "root": "pages/search/",
+      "name": "subpkg-search",
+      "pages": [
+        "search",
+        "result/result"
+      ]
+    },
+    {
+      "root": "pages/legal/",
+      "name": "subpkg-legal",
+      "pages": [
+        "agreement/agreement",
+        "privacy/privacy"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["subpkg-game", "subpkg-search"]
+    },
+    "pages/category/category": {
+      "network": "all",
+      "packages": ["subpkg-game"]
+    },
+    "pages/rank/rank": {
+      "network": "all",
+      "packages": ["subpkg-game"]
+    },
+    "pages/mine/mine": {
+      "network": "wifi",
+      "packages": ["subpkg-legal"]
+    }
+  },
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#ffffff",
@@ -57,6 +95,8 @@
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "usingComponents": {
-    "privacy-popup": "/components/privacy-popup/privacy-popup"
+    "privacy-popup": "/components/privacy-popup/privacy-popup",
+    "skeleton": "/components/skeleton/skeleton",
+    "empty-state": "/components/empty-state/empty-state"
   }
 }

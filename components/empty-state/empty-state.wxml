@@ -1,0 +1,12 @@
+<!--components/empty-state/empty-state.wxml-->
+<view class="empty-state {{ compact ? 'empty-state--compact' : '' }}">
+  <view class="empty-state__icon">{{ resolved.icon }}</view>
+  <view wx:if="{{ resolved.title }}" class="empty-state__title">{{ resolved.title }}</view>
+  <view wx:if="{{ resolved.desc }}" class="empty-state__desc">{{ resolved.desc }}</view>
+  <view
+    wx:if="{{ resolved.actionText }}"
+    class="empty-state__btn empty-state__btn--{{ actionTheme }}"
+    bindtap="handleAction"
+    hover-class="empty-state__btn--hover"
+  >{{ resolved.actionText }}</view>
+</view>

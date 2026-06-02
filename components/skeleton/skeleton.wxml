@@ -1,0 +1,46 @@
+<!--components/skeleton/skeleton.wxml-->
+<view wx:if="{{ visible }}" class="skeleton {{ animated ? 'skeleton--animated' : '' }}">
+
+  <!-- 模式 1：游戏卡片列表 -->
+  <view wx:if="{{ type === 'list' }}" class="sk-list">
+    <view class="sk-card" wx:for="{{ items }}" wx:key="*this">
+      <view class="sk-card__cover sk-block"></view>
+      <view class="sk-card__body">
+        <view class="sk-line sk-line--title"></view>
+        <view class="sk-line sk-line--desc"></view>
+        <view class="sk-line sk-line--desc sk-line--short"></view>
+        <view class="sk-card__meta">
+          <view class="sk-pill"></view>
+          <view class="sk-pill sk-pill--narrow"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 模式 2：详情页 -->
+  <view wx:elif="{{ type === 'detail' }}" class="sk-detail">
+    <view class="sk-detail__header sk-block"></view>
+    <view class="sk-detail__body">
+      <view class="sk-line sk-line--title sk-line--lg"></view>
+      <view class="sk-line sk-line--meta"></view>
+      <view class="sk-detail__tags">
+        <view class="sk-pill" wx:for="{{ 5 }}" wx:key="*this"></view>
+      </view>
+      <view class="sk-line"></view>
+      <view class="sk-line"></view>
+      <view class="sk-line sk-line--short"></view>
+      <view class="sk-detail__screenshots">
+        <view class="sk-block sk-shot" wx:for="{{ 3 }}" wx:key="*this"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 模式 3：分类九宫格 -->
+  <view wx:elif="{{ type === 'grid' }}" class="sk-grid">
+    <view class="sk-grid__cell" wx:for="{{ items }}" wx:key="*this">
+      <view class="sk-block sk-grid__icon"></view>
+      <view class="sk-line sk-line--narrow"></view>
+    </view>
+  </view>
+
+</view>

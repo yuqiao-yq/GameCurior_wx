@@ -1,10 +1,15 @@
 <!--pages/game/detail/detail.wxml-->
 <view class="page">
-  <!-- 加载中 -->
-  <view wx:if="{{ loading }}" class="loading-state">加载中…</view>
+  <!-- 加载中：详情骨架屏 -->
+  <skeleton wx:if="{{ loading }}" type="detail" />
 
   <!-- 空态 -->
-  <view wx:elif="{{ !game }}" class="empty-state">游戏不存在或已下架</view>
+  <empty-state
+    wx:elif="{{ !game }}"
+    type="empty"
+    title="游戏不存在或已下架"
+    desc="可能已被删除或暂时不可访问"
+  />
 
   <!-- 详情内容 -->
   <block wx:else>

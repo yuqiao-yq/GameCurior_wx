@@ -8,15 +8,14 @@
     </view>
   </view>
 
-  <!-- 加载中（首次） -->
-  <view wx:if="{{ !inited && loading }}" class="loading">加载中…</view>
+  <!-- 加载中（首次）：骨架屏 -->
+  <skeleton wx:if="{{ !inited && loading }}" type="list" count="4" />
 
   <!-- 空态 -->
-  <view wx:elif="{{ inited && list.length === 0 }}" class="empty">
-    <view class="empty__icon">📜</view>
-    <view class="empty__title">还没有浏览记录</view>
-    <view class="empty__desc">去首页发现你感兴趣的游戏吧</view>
-  </view>
+  <empty-state
+    wx:elif="{{ inited && list.length === 0 }}"
+    type="no-history"
+  />
 
   <!-- 分组列表 -->
   <view wx:else class="groups">

@@ -11,8 +11,11 @@
     >{{ item.label }}</view>
   </view>
 
+  <!-- 首次加载：骨架屏 -->
+  <skeleton wx:if="{{ loading && list.length === 0 }}" type="list" count="4" />
+
   <!-- 列表 -->
-  <view class="list" wx:if="{{ list.length > 0 }}">
+  <view class="list" wx:elif="{{ list.length > 0 }}">
     <view
       class="fav-card"
       wx:for="{{ list }}"
@@ -43,13 +46,12 @@
   </view>
 
   <!-- 空态 -->
-  <view wx:elif="{{ !loading }}" class="empty">
-    <view class="empty__icon">🎮</view>
-    <view class="empty__text">还没有收藏哦</view>
-    <view class="empty__hint">去首页发现好游戏吧</view>
-  </view>
+  <empty-state
+    wx:elif="{{ !loading }}"
+    type="no-favorite"
+  />
 
   <!-- 底部状态 -->
   <view wx:if="{{ list.length > 0 && !hasMore }}" class="footer-text">— 到底啦 —</view>
-  <view wx:if="{{ loading }}" class="footer-text">加载中…</view>
+  <view wx:if="{{ loading && list.length > 0 }}" class="footer-text">加载中…</view>
 </view>

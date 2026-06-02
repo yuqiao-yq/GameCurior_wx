@@ -45,11 +45,14 @@
       <view wx:if="{{ isMock }}" class="section__tag">演示数据</view>
     </view>
 
-    <view wx:if="{{ loading }}" class="loading">加载中...</view>
+    <skeleton wx:if="{{ loading }}" type="list" count="4" />
 
-    <view wx:elif="{{ games.length === 0 }}" class="empty">
-      暂无数据，请先在云开发控制台录入游戏
-    </view>
+    <empty-state
+      wx:elif="{{ games.length === 0 }}"
+      type="empty"
+      title="还没有游戏数据"
+      desc="请先在云开发控制台运行 initGames 录入种子数据"
+    />
 
     <view wx:else class="game-list">
       <view
