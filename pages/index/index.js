@@ -65,10 +65,10 @@ Page({
   async fetchGameList() {
     this.setData({ loading: true });
     try {
+      // 首页只拉前 10 条做"今日精选"展示，更多走榜单/搜索页（首屏体积 & 渲染压力）
       const data = await cloud.callFunction(
         'getGameList',
-        // TODO: 后续做列表页 / 榜单页后，首页 pageSize 改回 10，加"查看更多"跳转
-        { page: 1, pageSize: 50, sort: 'rating' },
+        { page: 1, pageSize: 10, sort: 'rating' },
         { showError: false }
       );
       this.setData({

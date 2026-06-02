@@ -209,7 +209,8 @@ async function handleCreate(event, openid) {
   const checkResult = await safeCheck(auditText, openid);
   if (!checkResult.pass) {
     return {
-      code: 1005,
+      // 1005 = 审核不通过；5001 = 审核服务暂不可用（fail-closed），便于前端做重试提示
+      code: checkResult.degraded ? 5001 : 1005,
       message: checkResult.message || '清单内容包含违规',
       data: null,
     };
@@ -273,7 +274,11 @@ async function handleUpdate(event, openid) {
     const auditText = auditParts.join('\n');
     const checkResult = await safeCheck(auditText, openid);
     if (!checkResult.pass) {
-      return { code: 1005, message: checkResult.message || '内容包含违规', data: null };
+      return {
+        code: checkResult.degraded ? 5001 : 1005,
+        message: checkResult.message || '内容包含违规',
+        data: null,
+      };
     }
   }
 
@@ -303,6 +308,8 @@ async function handleDelete(event, openid) {
 }
 
 // ============ 内容安全审核（云函数互调） ============
+// fail-closed：审核服务异常时拒绝写入。文案区分"违规"与"审核不可用"，
+// 便于前端给出"稍后重试"提示而不是"内容违规"误导。
 async function safeCheck(content, openid) {
   if (!content || !content.trim()) return { pass: true };
   try {
@@ -311,9 +318,18 @@ async function safeCheck(content, openid) {
       data: { action: 'text', content, scene: 1 },
     });
     const data = (res.result && res.result.data) || {};
-    return { pass: data.pass !== false, message: data.message };
+    return {
+      pass: data.pass === true,
+      degraded: data.degraded === true,
+      message: data.message || (data.degraded ? '审核服务暂不可用，请稍后再试' : '内容包含违规内容'),
+    };
   } catch (e) {
-    console.warn('[gameList] contentCheck error, degraded pass:', e.message);
-    return { pass: true };
+    // 云函数互调本身异常（网络/部署）也按 fail-closed 处理
+    console.error('[gameList] contentCheck invoke error:', e.message);
+    return {
+      pass: false,
+      degraded: true,
+      message: '审核服务暂不可用，请稍后再试',
+    };
   }
 }

@@ -59,23 +59,24 @@ async function handleUpdate(event, openid) {
       };
     }
 
-    // 调内容安全审核
+    // 调内容安全审核 — fail-closed：审核服务异常时拒绝写入
+    let checkData = null;
     try {
       const checkRes = await cloud.callFunction({
         name: 'contentCheck',
         data: { action: 'text', content: trimmed, scene: 1 },
       });
-      const checkData = (checkRes.result && checkRes.result.data) || {};
-      if (checkData.pass === false) {
-        return {
-          code: 1004,
-          message: checkData.message || '昵称包含违规内容',
-          data: { pass: false, riskType: checkData.riskType },
-        };
-      }
+      checkData = (checkRes.result && checkRes.result.data) || null;
     } catch (e) {
-      // 审核接口异常 → 降级放行，但记录日志
-      console.warn('[userProfile:update] contentCheck error, fall through:', e.message);
+      console.error('[userProfile:update] contentCheck invoke error:', e.message);
+    }
+    if (!checkData || checkData.pass !== true) {
+      const degraded = !checkData || checkData.degraded === true;
+      return {
+        code: degraded ? 5001 : 1004,
+        message: (checkData && checkData.message) || (degraded ? '审核服务暂不可用，请稍后再试' : '昵称包含违规内容'),
+        data: { pass: false, riskType: checkData && checkData.riskType, degraded },
+      };
     }
 
     update.nickname = trimmed;

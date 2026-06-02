@@ -25,56 +25,48 @@ exports.main = async (event, context) => {
     }
     const gameData = game.data;
 
-    // 2. 并发查"是否已收藏" + 上报浏览历史
-    const tasks = [];
+    // 2. 并发查"是否已收藏" + "相关游戏"（这两个结果要返回给前端）
+    //    浏览历史上报"发后即忘"，不进 Promise.all，避免阻塞响应也避免与上面两项的解构顺序耦合
+    const userCtxP = favoritesCol
+      .where({ _openid: OPENID, gameId: id })
+      .limit(1)
+      .get()
+      .then((r) => ({ favorited: r.data.length > 0, favoriteStatus: r.data[0] && r.data[0].status }))
+      .catch(() => ({ favorited: false, favoriteStatus: null }));
 
-    // 2a. 查收藏状态
-    tasks.push(
-      favoritesCol
-        .where({ _openid: OPENID, gameId: id })
-        .limit(1)
-        .get()
-        .then((r) => ({ favorited: r.data.length > 0, favoriteStatus: r.data[0] && r.data[0].status }))
-        .catch(() => ({ favorited: false, favoriteStatus: null }))
-    );
+    // 相关游戏（同类目 / 同标签，按评分倒序）
+    // 注：微信云数据库的"或"应使用 _.or([...])，不能写 Mongo 风格的 $or 字符串 key
+    const tags = gameData.tags || [];
+    const orClauses = [];
+    if (gameData.categoryId) orClauses.push({ categoryId: gameData.categoryId });
+    if (tags.length) orClauses.push({ tags: _.in(tags) });
 
-    // 2b. 找相关游戏（同类目 / 同标签，按评分倒序）
-    tasks.push(
-      gamesCol
-        .where({
-          _id: _.neq(id),
-          status: 1,
-          $or: gameData.categoryId
-            ? [{ categoryId: gameData.categoryId }, { tags: _.in(gameData.tags || []) }]
-            : [{ tags: _.in(gameData.tags || []) }],
-        })
-        .orderBy('rating', 'desc')
-        .limit(5)
-        .field({ name: true, cover: true, rating: true, price: true, tags: true })
-        .get()
-        .then((r) => r.data)
-        .catch(() => [])
-    );
+    const relatedP = orClauses.length
+      ? gamesCol
+          .where(_.and([
+            { _id: _.neq(id), status: 1 },
+            orClauses.length === 1 ? orClauses[0] : _.or(orClauses),
+          ]))
+          .orderBy('rating', 'desc')
+          .limit(5)
+          .field({ name: true, cover: true, rating: true, price: true, tags: true })
+          .get()
+          .then((r) => r.data)
+          .catch(() => [])
+      : Promise.resolve([]);
 
-    // 2c. 上报浏览历史（先删旧记录再插入，去重）+ 累加 viewCount
-    if (reportHistory) {
-      tasks.push(
-        (async () => {
+    // 浏览历史上报（先删旧记录再插入，去重）+ 累加 viewCount
+    // 失败不影响主响应；与上面两个查询并发，但作为独立 promise，避免再次卷入解构顺序
+    const historyP = reportHistory
+      ? (async () => {
           try {
-            // 删旧的同 gameId 历史
             await historyCol
               .where({ _openid: OPENID, gameId: id })
               .remove()
               .catch(() => {});
-            // 插新的
             await historyCol.add({
-              data: {
-                _openid: OPENID,
-                gameId: id,
-                viewedAt: new Date(),
-              },
+              data: { _openid: OPENID, gameId: id, viewedAt: new Date() },
             });
-            // viewCount + 1
             await gamesCol.doc(id).update({
               data: { 'stats.viewCount': _.inc(1) },
             });
@@ -82,10 +74,10 @@ exports.main = async (event, context) => {
             console.warn('[history] report failed:', e.message);
           }
         })()
-      );
-    }
+      : Promise.resolve();
 
-    const [userCtx, related] = await Promise.all(tasks);
+    // 等三个并发任务都结束（history 结果不需要，仅等其完成 / 失败不阻塞响应内容）
+    const [userCtx, related] = await Promise.all([userCtxP, relatedP, historyP]);
 
     return {
       code: 0,

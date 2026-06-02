@@ -1,18 +1,25 @@
 // app.js
+
+// 本地环境配置（CLOUD_ENV_ID 等）。
+// utils/env.js 不入版本控制，新人请复制 utils/env.example.js → utils/env.js 并填入自己的环境 ID。
+let ENV;
+try {
+  ENV = require('./utils/env.js');
+} catch (e) {
+  console.error('[env] 缺少 utils/env.js，请按 utils/env.example.js 创建后填入云开发环境 ID');
+  ENV = {};
+}
+
 App({
   onLaunch() {
     console.log('GameCurior 小程序启动');
 
-    // ============================================================
-    // 初始化微信云开发（CloudBase）
-    // ⚠️ 重要：env 必须是你自己的云开发环境 ID
-    //   1. 微信开发者工具顶部「云开发」→ 复制环境 ID
-    //   2. 把下方 CLOUD_ENV_ID 替换为你的环境 ID
-    // ============================================================
-    const CLOUD_ENV_ID = 'cloud1-8g8jrsgc94538121'; // TODO: 替换为你的环境 ID
+    const CLOUD_ENV_ID = ENV.CLOUD_ENV_ID;
 
     if (!wx.cloud) {
       console.error('当前微信版本过低，无法使用云能力，请升级到最新版本');
+    } else if (!CLOUD_ENV_ID || CLOUD_ENV_ID === 'your-cloud-env-id-here') {
+      console.error('[cloud] CLOUD_ENV_ID 未配置，云能力不可用');
     } else {
       wx.cloud.init({
         env: CLOUD_ENV_ID,

@@ -200,23 +200,26 @@ async function handleUpdateReview(event, openid) {
         data: null,
       };
     }
-    // 内容安全审核（非空才走）
+    // 内容安全审核（非空才走）— fail-closed：审核服务异常时也拒绝写入
     if (trimmed) {
+      let checkData = null;
       try {
         const res = await cloud.callFunction({
           name: 'contentCheck',
           data: { action: 'text', content: trimmed, scene: 2 }, // scene=2 评论
         });
-        const checkData = (res.result && res.result.data) || {};
-        if (checkData.pass === false) {
-          return {
-            code: 1005,
-            message: checkData.message || '评价包含违规内容',
-            data: null,
-          };
-        }
+        checkData = (res.result && res.result.data) || null;
       } catch (e) {
-        console.warn('[gameListItem:updateReview] contentCheck degraded:', e.message);
+        console.error('[gameListItem:updateReview] contentCheck invoke error:', e.message);
+      }
+      // 没有结果 或 pass !== true → 拒绝
+      if (!checkData || checkData.pass !== true) {
+        const degraded = !checkData || checkData.degraded === true;
+        return {
+          code: degraded ? 5001 : 1005,
+          message: (checkData && checkData.message) || (degraded ? '审核服务暂不可用，请稍后再试' : '评价包含违规内容'),
+          data: null,
+        };
       }
     }
     patch.review = trimmed;

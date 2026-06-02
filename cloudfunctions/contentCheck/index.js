@@ -42,11 +42,16 @@ exports.main = async (event, context) => {
     }
   } catch (err) {
     console.error('[contentCheck] fatal:', err);
-    // 失败时降级放行（避免内容安全接口异常完全阻塞业务）
+    // 失败时 fail-closed：默认拒绝，由业务层根据 degraded 标志决定提示文案
+    // （合规底线：不允许内容审核异常时违规内容直接落库）
     return {
-      code: 0,
-      message: 'check failed but pass (degraded)',
-      data: { pass: true, message: '审核接口异常，已放行', degraded: true },
+      code: 5000,
+      message: 'content check service unavailable',
+      data: {
+        pass: false,
+        degraded: true,
+        message: '审核服务暂不可用，请稍后再试',
+      },
     };
   }
 };
