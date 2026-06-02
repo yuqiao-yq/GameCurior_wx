@@ -1,6 +1,11 @@
 /* pages/rank/rank.wxss */
-.page { min-height: 100vh; background: #f6f7fb; padding-bottom: 40rpx; }
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 40rpx;
+}
 
+/* ============ Tab ============ */
 .tabs {
   display: flex;
   background: #ffffff;
@@ -10,6 +15,7 @@
   top: 0;
   z-index: 10;
 }
+
 .tab {
   flex: 1;
   text-align: center;
@@ -18,10 +24,12 @@
   color: #4e5969;
   position: relative;
 }
+
 .tab--active {
   color: #5b3aa8;
   font-weight: 600;
 }
+
 .tab--active::after {
   content: '';
   position: absolute;
@@ -34,22 +42,182 @@
   border-radius: 2rpx;
 }
 
+/* ============ Hero ============ */
 .hero {
   margin: 24rpx;
-  padding: 48rpx 32rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
+  padding: 36rpx 32rpx;
+  color: #ffffff;
   border-radius: 20rpx;
-  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(31, 35, 41, 0.08);
 }
-.hero__icon { font-size: 80rpx; margin-bottom: 16rpx; }
-.hero__title { font-size: 36rpx; font-weight: 700; margin-bottom: 8rpx; }
-.hero__desc { font-size: 24rpx; opacity: 0.85; }
+
+.hero--hot {
+  background: linear-gradient(135deg, #ff7d00 0%, #f53f3f 100%);
+}
+
+.hero--new {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.hero--rating {
+  background: linear-gradient(135deg, #ff9a23 0%, #ffd23f 100%);
+}
+
+.hero--discount {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.hero__title {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.hero__desc {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* ============ 状态 ============ */
+.loading {
+  padding: 40rpx 0;
+  text-align: center;
+  color: #86909c;
+  font-size: 26rpx;
+}
 
 .empty {
-  padding: 200rpx 0;
+  padding: 120rpx 60rpx;
   text-align: center;
 }
-.empty__icon { font-size: 100rpx; margin-bottom: 24rpx; }
-.empty__text { font-size: 30rpx; color: #1f2329; font-weight: 600; margin-bottom: 8rpx; }
-.empty__hint { font-size: 24rpx; color: #86909c; }
+
+.empty__icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.5;
+}
+
+.empty__text {
+  font-size: 30rpx;
+  color: #1f2329;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.empty__hint {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+/* ============ 榜单列表 ============ */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 0 24rpx;
+}
+
+.rank-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.rank-item--hover {
+  transform: scale(0.98);
+}
+
+/* 名次徽章 */
+.rank-item__no {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  font-style: italic;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.rank-item__no--top {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff7d00 0%, #f53f3f 100%);
+  box-shadow: 0 4rpx 12rpx rgba(245, 63, 63, 0.25);
+}
+
+.rank-item__no--normal {
+  color: #86909c;
+  background: #f2f3f5;
+}
+
+.rank-item__cover {
+  width: 140rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  background: #f2f3f5;
+  flex-shrink: 0;
+}
+
+.rank-item__body {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rank-item__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-item__desc {
+  flex: 1;
+  font-size: 22rpx;
+  color: #86909c;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rank-item__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+
+.rank-item__rating {
+  font-size: 24rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.rank-item__price {
+  font-size: 26rpx;
+  color: #f53f3f;
+  font-weight: 600;
+}
+
+.rank-item__discount {
+  padding: 2rpx 12rpx;
+  font-size: 20rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  border-radius: 8rpx;
+  font-weight: 600;
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "游戏列表",
+  "backgroundColor": "#f6f7fb",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 100
+}

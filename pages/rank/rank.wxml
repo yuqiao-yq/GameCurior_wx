@@ -1,5 +1,6 @@
 <!--pages/rank/rank.wxml-->
 <view class="page">
+  <!-- Tab 切换 -->
   <view class="tabs">
     <view
       class="tab {{ activeTab === index ? 'tab--active' : '' }}"
@@ -10,15 +11,75 @@
     >{{ item.label }}</view>
   </view>
 
-  <view class="hero">
-    <view class="hero__icon">{{ tabs[activeTab].label.substring(0, 2) }}</view>
+  <!-- 当前榜单 Hero -->
+  <view class="hero hero--{{ tabs[activeTab].key }}">
     <view class="hero__title">{{ tabs[activeTab].label }}</view>
     <view class="hero__desc">{{ tabs[activeTab].desc }}</view>
   </view>
 
-  <view class="empty">
-    <view class="empty__icon">🚧</view>
-    <view class="empty__text">榜单功能开发中</view>
-    <view class="empty__hint">敬请期待</view>
-  </view>
+  <!-- 当前榜单内容 -->
+  <block wx:for="{{ tabs }}" wx:for-item="tab" wx:for-index="tabIdx" wx:key="key">
+    <view wx:if="{{ activeTab === tabIdx }}">
+      <!-- 首次加载 -->
+      <view wx:if="{{ !tabStates[tabIdx].inited && tabStates[tabIdx].loading }}" class="loading">
+        加载中…
+      </view>
+
+      <!-- 空态 -->
+      <view wx:elif="{{ tabStates[tabIdx].inited && tabStates[tabIdx].list.length === 0 }}" class="empty">
+        <view class="empty__icon">📭</view>
+        <view class="empty__text">榜单还在生成中</view>
+        <view class="empty__hint">请在云开发控制台同步游戏数据</view>
+      </view>
+
+      <!-- 列表 -->
+      <view wx:else class="rank-list">
+        <view
+          class="rank-item"
+          wx:for="{{ tabStates[tabIdx].list }}"
+          wx:key="_id"
+          wx:for-item="game"
+          wx:for-index="rankIdx"
+          data-id="{{ game._id }}"
+          bindtap="handleGameTap"
+          hover-class="rank-item--hover"
+        >
+          <!-- 名次徽章 -->
+          <view class="rank-item__no rank-item__no--{{ rankIdx < 3 ? 'top' : 'normal' }}">
+            {{ rankIdx + 1 }}
+          </view>
+
+          <image
+            class="rank-item__cover"
+            src="{{ game.cover || game.headerImage }}"
+            mode="aspectFill"
+            lazy-load
+          />
+
+          <view class="rank-item__body">
+            <view class="rank-item__title">{{ game.name }}</view>
+            <view wx:if="{{ game.description }}" class="rank-item__desc">{{ game.description }}</view>
+            <view class="rank-item__meta">
+              <view wx:if="{{ game.rating }}" class="rank-item__rating">⭐ {{ game.rating }}</view>
+              <view wx:if="{{ game.price }}" class="rank-item__price">¥{{ game.price }}</view>
+              <view
+                wx:if="{{ tabs[tabIdx].key === 'discount' && game.originalPrice && game.price && game.originalPrice > game.price }}"
+                class="rank-item__discount"
+              >
+                省 ¥{{ game.originalPrice - game.price }}
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 加载状态 -->
+        <view wx:if="{{ tabStates[tabIdx].loading && tabStates[tabIdx].list.length > 0 }}" class="loading">
+          加载中…
+        </view>
+        <view wx:elif="{{ !tabStates[tabIdx].hasMore && tabStates[tabIdx].list.length > 0 }}" class="loading">
+          — 没有更多了 —
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

@@ -30,8 +30,9 @@ Page({
 
   handleCategoryTap(e) {
     const { id, name } = e.currentTarget.dataset;
-    // 暂时复用首页查询逻辑，跳到一个简化版的分类列表
-    wx.showToast({ title: `${name} 分类页开发中`, icon: 'none' });
-    // TODO: 后续做 pages/category/list?id=xxx
+    if (!id) return;
+    wx.navigateTo({
+      url: `/pages/game/list/list?categoryId=${id}&name=${encodeURIComponent(name || '')}`,
+    });
   },
 });

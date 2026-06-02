@@ -1,0 +1,58 @@
+<!--pages/game/list/list.wxml-->
+<view class="page">
+  <!-- 顶部排序 Tab -->
+  <view class="sort-tabs">
+    <view
+      class="sort-tab {{ sort === item.key ? 'sort-tab--active' : '' }}"
+      wx:for="{{ sortTabs }}"
+      wx:key="key"
+      data-key="{{ item.key }}"
+      bindtap="handleSortChange"
+    >
+      {{ item.label }}
+    </view>
+  </view>
+
+  <!-- 加载中（首次） -->
+  <view wx:if="{{ !inited && loading }}" class="loading">加载中…</view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{ inited && list.length === 0 }}" class="empty">
+    <view class="empty__icon">📭</view>
+    <view class="empty__title">该分类下还没有游戏</view>
+    <view class="empty__desc">换个分类试试，或在云开发控制台同步数据</view>
+  </view>
+
+  <!-- 列表 -->
+  <view wx:else class="game-list">
+    <view
+      class="game-card"
+      wx:for="{{ list }}"
+      wx:key="_id"
+      data-id="{{ item._id }}"
+      bindtap="handleGameTap"
+      hover-class="game-card--hover"
+    >
+      <image
+        class="game-card__cover"
+        src="{{ item.cover || item.headerImage }}"
+        mode="aspectFill"
+        lazy-load
+      />
+      <view class="game-card__body">
+        <view class="game-card__title">{{ item.name }}</view>
+        <view wx:if="{{ item.description }}" class="game-card__desc">{{ item.description }}</view>
+        <view class="game-card__meta">
+          <view wx:if="{{ item.rating }}" class="game-card__rating">⭐ {{ item.rating }}</view>
+          <view wx:if="{{ item.price }}" class="game-card__price">¥{{ item.price }}</view>
+        </view>
+        <view wx:if="{{ item.tags && item.tags.length }}" class="game-card__tags">
+          <text class="tag" wx:for="{{ item.tags }}" wx:for-item="tag" wx:key="*this" wx:for-index="i" wx:if="{{ i < 4 }}">{{ tag }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ loading && list.length > 0 }}" class="loading">加载中…</view>
+    <view wx:elif="{{ !hasMore && list.length > 0 }}" class="loading">— 没有更多了 —</view>
+  </view>
+</view>

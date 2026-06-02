@@ -1,0 +1,163 @@
+/* pages/game/list/list.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 40rpx;
+}
+
+/* 排序 Tab */
+.sort-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  background: #ffffff;
+  padding: 0 32rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+
+.sort-tab {
+  position: relative;
+  padding: 24rpx 0;
+  margin-right: 48rpx;
+  font-size: 28rpx;
+  color: #86909c;
+}
+
+.sort-tab--active {
+  color: #1f2329;
+  font-weight: 600;
+}
+
+.sort-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background: #5b3aa8;
+  border-radius: 2rpx;
+}
+
+/* 状态 */
+.loading {
+  padding: 40rpx 0;
+  text-align: center;
+  color: #86909c;
+  font-size: 26rpx;
+}
+
+.empty {
+  padding: 160rpx 60rpx;
+  text-align: center;
+}
+
+.empty__icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.5;
+}
+
+.empty__title {
+  font-size: 30rpx;
+  color: #1f2329;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.empty__desc {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+/* 游戏卡片 */
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 24rpx 32rpx;
+}
+
+.game-card {
+  display: flex;
+  background: #ffffff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.game-card--hover {
+  transform: scale(0.98);
+}
+
+.game-card__cover {
+  width: 200rpx;
+  height: 240rpx;
+  background: #f2f3f5;
+  flex-shrink: 0;
+}
+
+.game-card__body {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.game-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-card__desc {
+  flex: 1;
+  font-size: 22rpx;
+  color: #86909c;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.game-card__meta {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.game-card__rating {
+  font-size: 24rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.game-card__price {
+  margin-left: auto;
+  font-size: 26rpx;
+  color: #f53f3f;
+  font-weight: 600;
+}
+
+.game-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.tag {
+  padding: 2rpx 12rpx;
+  font-size: 20rpx;
+  color: #5b3aa8;
+  background: #f2f4ff;
+  border-radius: 12rpx;
+}

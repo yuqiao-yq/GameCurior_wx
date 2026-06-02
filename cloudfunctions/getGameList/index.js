@@ -10,6 +10,10 @@ const SORT_MAP = {
   rating: { field: 'rating', order: 'desc' },
   new: { field: 'releasedAt', order: 'desc' },
   hot: { field: 'stats.viewCount', order: 'desc' },
+  // 降价榜：按当前价格升序（实际可结合 originalPrice 计算折扣，这里简化）
+  discount: { field: 'price', order: 'asc' },
+  // 销量榜：按 owners 估算（来自 SteamSpy）
+  sales: { field: 'stats.owners', order: 'desc' },
 };
 
 // Mock 数据：用于云数据库尚未录入时的演示
@@ -56,18 +60,30 @@ exports.main = async (event, context) => {
     categoryId,
     sort = 'rating',
     keyword,
+    tag, // 按单个标签筛选
   } = event;
 
   try {
+    const _ = db.command;
     const where = { status: 1 };
     if (categoryId) where.categoryId = categoryId;
+    if (tag) where.tags = tag; // MongoDB 数组字段直接匹配元素
+
+    // 降价榜需要额外过滤：必须有价格且有折扣
+    if (sort === 'discount') {
+      where.price = _.gt(0);
+      where.originalPrice = _.gt(0);
+    }
+    // 新游榜过滤：必须有发售时间
+    if (sort === 'new') {
+      where.releasedAt = _.exists(true).and(_.neq(null));
+    }
 
     const sortConfig = SORT_MAP[sort] || SORT_MAP.rating;
 
     let query = gamesCol.where(where);
     if (keyword) {
       // 简单模糊匹配（生产环境建议接入云开发的全文搜索或自建 ES）
-      const _ = db.command;
       query = gamesCol.where({
         ...where,
         name: db.RegExp({ regexp: keyword, options: 'i' }),

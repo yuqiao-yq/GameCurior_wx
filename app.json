@@ -5,6 +5,7 @@
     "pages/category/category",
     "pages/mine/mine",
     "pages/game/detail/detail",
+    "pages/game/list/list",
     "pages/mine/favorites/favorites",
     "pages/search/search",
     "pages/search/result/result"
