@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>GameCurior Logo 生成器</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #0e1014;
+    color: #ffffff;
+    margin: 0;
+    padding: 48px 32px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 32px;
+    margin: 0 0 8px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .desc {
+    color: #86909c;
+    margin-bottom: 32px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding: 20px 24px;
+    background: #1a1d24;
+    border-radius: 12px;
+  }
+  .toolbar__label {
+    font-size: 13px;
+    color: #86909c;
+    margin-right: 8px;
+  }
+  .swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.15s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch--active {
+    border-color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: linear-gradient(180deg, #1a1d24 0%, #15181f 100%);
+    padding: 28px 24px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid #25282f;
+  }
+  .card__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .card__subtitle {
+    font-size: 12px;
+    color: #86909c;
+    margin-bottom: 20px;
+  }
+  .preview-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .preview-wrap > div { text-align: center; }
+  .preview-wrap span {
+    display: block;
+    font-size: 11px;
+    color: #86909c;
+    margin-top: 8px;
+  }
+  canvas {
+    background: transparent;
+    display: block;
+  }
+  .download-btn {
+    width: 100%;
+    background: #5b3aa8;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .download-btn:hover { background: #6d4ec2; }
+
+  .tips {
+    margin-top: 40px;
+    padding: 24px;
+    background: #1a1d24;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #c9cdd4;
+    line-height: 1.8;
+  }
+  .tips h3 {
+    margin: 0 0 12px;
+    color: #ffffff;
+    font-size: 15px;
+  }
+  .tips code {
+    background: #25282f;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎮 GameCurior Logo 生成器</h1>
+<p class="desc">3 套简约设计，选择主题色后点击下载 512×512 PNG。可直接用作小程序图标 / 公众号头像。</p>
+
+<!-- 主题色选择 -->
+<div class="toolbar">
+  <span class="toolbar__label">主题色：</span>
+  <div class="swatch swatch--active" data-theme="purple" style="background: linear-gradient(135deg, #667eea, #764ba2);" title="紫色渐变（默认）"></div>
+  <div class="swatch" data-theme="deepPurple" style="background: linear-gradient(135deg, #5b3aa8, #2d1b69);" title="深紫"></div>
+  <div class="swatch" data-theme="blue" style="background: linear-gradient(135deg, #4facfe, #00f2fe);" title="海蓝"></div>
+  <div class="swatch" data-theme="sunset" style="background: linear-gradient(135deg, #ff7d00, #f53f3f);" title="日落"></div>
+  <div class="swatch" data-theme="forest" style="background: linear-gradient(135deg, #43e97b, #38f9d7);" title="森林"></div>
+  <div class="swatch" data-theme="dark" style="background: linear-gradient(135deg, #232526, #414345);" title="暗夜"></div>
+  <div class="swatch" data-theme="pink" style="background: linear-gradient(135deg, #f093fb, #f5576c);" title="粉霞"></div>
+</div>
+
+<!-- 设计方案 -->
+<div class="grid">
+
+  <!-- 方案 A：手柄 + 星星 -->
+  <div class="card">
+    <h3 class="card__title">A · 策展手柄</h3>
+    <p class="card__subtitle">游戏手柄 + 精选星星</p>
+    <div class="preview-wrap">
+      <div>
+        <canvas id="canvas-a-lg" width="256" height="256"></canvas>
+        <span>预览（256）</span>
+      </div>
+    </div>
+    <button class="download-btn" onclick="download('a', 512)">下载 PNG（512×512）</button>
+  </div>
+
+  <!-- 方案 B：字母 G -->
+  <div class="card">
+    <h3 class="card__title">B · 几何 G</h3>
+    <p class="card__subtitle">无衬线字母 + 像素角标</p>
+    <div class="preview-wrap">
+      <div>
+        <canvas id="canvas-b-lg" width="256" height="256"></canvas>
+        <span>预览（256）</span>
+      </div>
+    </div>
+    <button class="download-btn" onclick="download('b', 512)">下载 PNG（512×512）</button>
+  </div>
+
+  <!-- 方案 C：极简剪影 -->
+  <div class="card">
+    <h3 class="card__title">C · 像素剪影</h3>
+    <p class="card__subtitle">最极致简洁，纯白色手柄</p>
+    <div class="preview-wrap">
+      <div>
+        <canvas id="canvas-c-lg" width="256" height="256"></canvas>
+        <span>预览（256）</span>
+      </div>
+    </div>
+    <button class="download-btn" onclick="download('c', 512)">下载 PNG（512×512）</button>
+  </div>
+
+</div>
+
+<div class="tips">
+  <h3>💡 使用说明</h3>
+  <p>1. 上方切换主题色，3 个方案会实时更新。</p>
+  <p>2. 选好后点击"下载 PNG（512×512）"，文件保存到本地。</p>
+  <p>3. 推荐使用场景：</p>
+  <p>　　- <strong>小程序图标</strong>：在微信公众平台后台 → 基本设置 → 头像上传（要求方形 ≥ 144×144，512 足够）</p>
+  <p>　　- <strong>小程序启动图</strong>：可直接用作 Hero 区域 logo</p>
+  <p>　　- <strong>App.json 中的 tabBar</strong>：本工具已有 <code>tools/generate-tabbar-icons.html</code> 单独生成</p>
+  <p>4. 如需 1024×1024 或矢量 SVG，可联系开发者扩展工具脚本。</p>
+</div>
+
+<script>
+// ============ 主题色定义 ============
+const THEMES = {
+  purple:     { type: 'gradient', stops: ['#667eea', '#764ba2'], accent: '#ffd23f' },
+  deepPurple: { type: 'gradient', stops: ['#5b3aa8', '#2d1b69'], accent: '#ffd23f' },
+  blue:       { type: 'gradient', stops: ['#4facfe', '#00f2fe'], accent: '#ffd23f' },
+  sunset:     { type: 'gradient', stops: ['#ff7d00', '#f53f3f'], accent: '#ffffff' },
+  forest:     { type: 'gradient', stops: ['#43e97b', '#38f9d7'], accent: '#ffffff' },
+  dark:       { type: 'gradient', stops: ['#232526', '#414345'], accent: '#5b3aa8' },
+  pink:       { type: 'gradient', stops: ['#f093fb', '#f5576c'], accent: '#ffd23f' },
+};
+
+let currentTheme = 'purple';
+
+// ============ 通用绘制：圆角矩形渐变背景 ============
+function drawBackground(ctx, size, theme) {
+  const radius = size * 0.22;          // iOS 风格圆角
+  // 渐变
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, theme.stops[0]);
+  grad.addColorStop(1, theme.stops[1]);
+  ctx.fillStyle = grad;
+
+  // 圆角矩形
+  ctx.beginPath();
+  ctx.moveTo(radius, 0);
+  ctx.lineTo(size - radius, 0);
+  ctx.quadraticCurveTo(size, 0, size, radius);
+  ctx.lineTo(size, size - radius);
+  ctx.quadraticCurveTo(size, size, size - radius, size);
+  ctx.lineTo(radius, size);
+  ctx.quadraticCurveTo(0, size, 0, size - radius);
+  ctx.lineTo(0, radius);
+  ctx.quadraticCurveTo(0, 0, radius, 0);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ============ 方案 A：手柄 + 星星 ============
+function drawDesignA(ctx, size, theme) {
+  drawBackground(ctx, size, theme);
+
+  // 手柄主体（圆角矩形，居中略偏下）
+  const cx = size / 2;
+  const cy = size * 0.55;
+  const w = size * 0.55;
+  const h = size * 0.28;
+  const r = h / 2;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  // 椭圆形手柄轮廓
+  ctx.ellipse(cx, cy, w / 2, h / 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 手柄两侧把手凸起
+  const grip = size * 0.13;
+  ctx.beginPath();
+  ctx.arc(cx - w / 2, cy + h * 0.35, grip, 0, Math.PI * 2);
+  ctx.arc(cx + w / 2, cy + h * 0.35, grip, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 左侧十字键（D-pad）
+  const padX = cx - w / 4;
+  const padY = cy;
+  const padSize = size * 0.06;
+  ctx.fillStyle = theme.stops[1];
+  // 竖
+  ctx.fillRect(padX - padSize / 4, padY - padSize, padSize / 2, padSize * 2);
+  // 横
+  ctx.fillRect(padX - padSize, padY - padSize / 4, padSize * 2, padSize / 2);
+
+  // 右侧两个按钮
+  ctx.beginPath();
+  ctx.arc(cx + w / 4 - padSize * 0.8, padY, padSize * 0.5, 0, Math.PI * 2);
+  ctx.arc(cx + w / 4 + padSize * 0.8, padY, padSize * 0.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 顶部精选星星徽章（左上角）
+  drawStar(ctx, size * 0.25, size * 0.28, size * 0.05, theme.accent);
+}
+
+// ============ 方案 B：字母 G ============
+function drawDesignB(ctx, size, theme) {
+  drawBackground(ctx, size, theme);
+
+  // 中央大字母 G
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${size * 0.6}px -apple-system, "Helvetica Neue", "PingFang SC", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('G', size / 2, size / 2 + size * 0.03);
+
+  // 右下角小像素方块装饰
+  const px = size * 0.06;
+  const baseX = size * 0.7;
+  const baseY = size * 0.7;
+  const dotColor = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillStyle = dotColor;
+  // 像素阵列
+  drawPixel(ctx, baseX, baseY, px);
+  drawPixel(ctx, baseX + px * 1.4, baseY, px);
+  drawPixel(ctx, baseX + px * 1.4, baseY + px * 1.4, px);
+  drawPixel(ctx, baseX + px * 2.8, baseY + px * 1.4, px);
+
+  // 左上小星星徽章
+  drawStar(ctx, size * 0.25, size * 0.25, size * 0.045, theme.accent);
+}
+
+// ============ 方案 C：极简像素剪影 ============
+function drawDesignC(ctx, size, theme) {
+  drawBackground(ctx, size, theme);
+
+  // 8-bit 像素风手柄剪影（用方格拼接）
+  const px = size * 0.07;
+  const cols = 8;
+  const rows = 5;
+  const totalW = cols * px;
+  const totalH = rows * px;
+  const offsetX = (size - totalW) / 2;
+  const offsetY = (size - totalH) / 2;
+
+  // 像素图谱（1 = 实心方块）
+  // 8x5 像素游戏手柄
+  const map = [
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 0, 0, 0, 0, 1, 1],
+  ];
+
+  ctx.fillStyle = '#ffffff';
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (map[y][x]) {
+        ctx.fillRect(offsetX + x * px, offsetY + y * px, px, px);
+      }
+    }
+  }
+}
+
+// ============ 工具：绘制 5 角星 ============
+function drawStar(ctx, cx, cy, r, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const angle = (Math.PI / 2) + (i * 2 * Math.PI / 5);
+    const x = cx + Math.cos(angle) * r;
+    const y = cy - Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+
+    const innerAngle = angle + Math.PI / 5;
+    const innerX = cx + Math.cos(innerAngle) * (r * 0.42);
+    const innerY = cy - Math.sin(innerAngle) * (r * 0.42);
+    ctx.lineTo(innerX, innerY);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// ============ 工具：绘制像素方块 ============
+function drawPixel(ctx, x, y, size) {
+  ctx.fillRect(x, y, size, size);
+}
+
+// ============ 通用渲染分发 ============
+function render(design, canvas, size) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+  const theme = THEMES[currentTheme];
+
+  if (design === 'a') drawDesignA(ctx, size, theme);
+  else if (design === 'b') drawDesignB(ctx, size, theme);
+  else if (design === 'c') drawDesignC(ctx, size, theme);
+}
+
+// ============ 重绘所有预览 ============
+function renderAll() {
+  ['a', 'b', 'c'].forEach((d) => {
+    const canvas = document.getElementById(`canvas-${d}-lg`);
+    if (canvas) render(d, canvas, 256);
+  });
+}
+
+// ============ 下载 PNG ============
+function download(design, size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  render(design, canvas, size);
+
+  const link = document.createElement('a');
+  link.download = `gamecurior-logo-${design}-${currentTheme}-${size}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ============ 主题色切换 ============
+document.querySelectorAll('.swatch').forEach((sw) => {
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('.swatch').forEach((s) => s.classList.remove('swatch--active'));
+    sw.classList.add('swatch--active');
+    currentTheme = sw.dataset.theme;
+    renderAll();
+  });
+});
+
+// ============ 初始渲染 ============
+renderAll();
+</script>
+
+</body>
+</html>
