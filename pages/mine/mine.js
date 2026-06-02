@@ -85,6 +85,11 @@ Page({
     wx.navigateTo({ url: '/pages/mine/favorites/favorites' });
   },
 
+  // 跳游戏清单
+  handleGotoLists() {
+    wx.navigateTo({ url: '/pages/mine/lists/lists' });
+  },
+
   // 跳浏览历史
   handleGotoHistory() {
     wx.navigateTo({ url: '/pages/mine/history/history' });

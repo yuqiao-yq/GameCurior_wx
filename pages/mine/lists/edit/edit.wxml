@@ -1,0 +1,67 @@
+<!--pages/mine/lists/edit/edit.wxml-->
+<view class="page">
+  <!-- 封面区 -->
+  <view class="cover-section">
+    <view class="cover-wrap" bindtap="handleChooseCover" hover-class="cover-wrap--hover">
+      <image
+        wx:if="{{ form.cover }}"
+        class="cover-img"
+        src="{{ form.cover }}"
+        mode="aspectFill"
+      />
+      <view wx:else class="cover-placeholder">
+        <text class="cover-placeholder__icon">📸</text>
+        <text class="cover-placeholder__text">添加封面</text>
+        <text class="cover-placeholder__hint">推荐 4:3 横向图</text>
+      </view>
+
+      <!-- 修改 / 删除按钮 -->
+      <view wx:if="{{ form.cover }}" class="cover-actions">
+        <view class="cover-action" catchtap="handleChooseCover">更换</view>
+        <view class="cover-action cover-action--del" catchtap="handleRemoveCover">删除</view>
+      </view>
+    </view>
+    <view class="cover-tips">不传封面将自动取清单内最新游戏的封面</view>
+  </view>
+
+  <!-- 表单 -->
+  <view class="form">
+    <view class="field">
+      <view class="field__label">清单名称 <text class="field__required">*</text></view>
+      <input
+        class="field__input"
+        type="text"
+        placeholder="例如：2024 RPG 之旅"
+        value="{{ form.name }}"
+        maxlength="{{ NAME_MAX }}"
+        bindinput="handleNameInput"
+      />
+      <view class="field__count">{{ nameLen }} / {{ NAME_MAX }}</view>
+    </view>
+
+    <view class="field">
+      <view class="field__label">简介</view>
+      <textarea
+        class="field__textarea"
+        placeholder="一句话介绍这个清单的主题（可选）"
+        value="{{ form.description }}"
+        maxlength="{{ DESC_MAX }}"
+        bindinput="handleDescInput"
+        auto-height
+      />
+      <view class="field__count">{{ descLen }} / {{ DESC_MAX }}</view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="footer">
+    <button
+      class="submit-btn {{ submitting ? 'submit-btn--disabled' : '' }}"
+      bindtap="handleSubmit"
+      disabled="{{ submitting }}"
+      hover-class="submit-btn--hover"
+    >
+      {{ isEdit ? '保存修改' : '创建清单' }}
+    </button>
+  </view>
+</view>

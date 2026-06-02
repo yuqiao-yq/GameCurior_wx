@@ -1,0 +1,68 @@
+<!--pages/mine/lists/lists.wxml-->
+<view class="page">
+  <!-- 顶部说明 -->
+  <view class="header">
+    <view class="header__title">我的游戏清单</view>
+    <view class="header__desc">把感兴趣的游戏整理成清单，附上评价导出分享</view>
+  </view>
+
+  <!-- 创建新清单按钮 -->
+  <view class="create-btn" bindtap="handleCreate" hover-class="create-btn--hover">
+    <text class="create-btn__plus">＋</text>
+    <text class="create-btn__text">创建新清单</text>
+  </view>
+
+  <!-- 骨架屏 -->
+  <skeleton wx:if="{{ !inited && loading }}" type="list" count="3" />
+
+  <!-- 空态 -->
+  <empty-state
+    wx:elif="{{ inited && lists.length === 0 }}"
+    type="empty"
+    icon="📑"
+    title="还没有清单"
+    desc="点击上方按钮创建第一个清单"
+  />
+
+  <!-- 清单列表 -->
+  <view wx:else class="list-grid">
+    <view
+      class="list-card"
+      wx:for="{{ lists }}"
+      wx:key="_id"
+      data-id="{{ item._id }}"
+      data-name="{{ item.name }}"
+      bindtap="handleItemTap"
+      bindlongpress="handleItemLongPress"
+      hover-class="list-card--hover"
+    >
+      <!-- 封面 -->
+      <view class="list-card__cover-wrap">
+        <image
+          wx:if="{{ item.cover || item._autoCover }}"
+          class="list-card__cover"
+          src="{{ item.cover || item._autoCover }}"
+          mode="aspectFill"
+          lazy-load
+        />
+        <view wx:else class="list-card__cover list-card__cover--placeholder">
+          <text class="list-card__cover-icon">📑</text>
+        </view>
+        <!-- 游戏数角标 -->
+        <view class="list-card__badge">{{ item.gameCount || 0 }} 款游戏</view>
+      </view>
+
+      <!-- 信息 -->
+      <view class="list-card__body">
+        <view class="list-card__name">{{ item.name }}</view>
+        <view wx:if="{{ item.description }}" class="list-card__desc">{{ item.description }}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{ loading && lists.length > 0 }}" class="loading">加载中…</view>
+    <view wx:elif="{{ !hasMore && lists.length > 0 }}" class="loading">— 没有更多了 —</view>
+  </view>
+
+  <!-- 提示：长按操作 -->
+  <view wx:if="{{ lists.length > 0 }}" class="tips">长按清单卡片可编辑或删除</view>
+</view>

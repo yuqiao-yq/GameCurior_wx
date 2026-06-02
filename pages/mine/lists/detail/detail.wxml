@@ -1,0 +1,137 @@
+<!--pages/mine/lists/detail/detail.wxml-->
+<view class="page">
+  <skeleton wx:if="{{ loading && !list }}" type="detail" />
+
+  <block wx:elif="{{ list }}">
+    <!-- Hero 区：清单封面 + 信息 -->
+    <view class="hero">
+      <image
+        wx:if="{{ list.cover }}"
+        class="hero__bg"
+        src="{{ list.cover }}"
+        mode="aspectFill"
+      />
+      <view wx:else class="hero__bg hero__bg--placeholder"></view>
+      <view class="hero__mask"></view>
+
+      <view class="hero__content">
+        <view class="hero__name">{{ list.name }}</view>
+        <view wx:if="{{ list.description }}" class="hero__desc">{{ list.description }}</view>
+        <view class="hero__meta">
+          <text class="hero__meta-item">📚 {{ list.gameCount || 0 }} 款游戏</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作栏 -->
+    <view class="actions">
+      <view class="action action--primary" bindtap="handleAddGame" hover-class="action--hover">
+        <text>＋ 添加游戏</text>
+      </view>
+      <view class="action" bindtap="handleExportImage" hover-class="action--hover">
+        <text>🎨 导出分享图</text>
+      </view>
+    </view>
+
+    <!-- 游戏列表 -->
+    <view wx:if="{{ items.length === 0 }}" class="empty-wrap">
+      <empty-state
+        type="empty"
+        icon="🎮"
+        title="清单还是空的"
+        desc="点击上方「添加游戏」开始整理"
+      />
+    </view>
+
+    <view wx:else class="items">
+      <view
+        class="item-card"
+        wx:for="{{ items }}"
+        wx:key="_id"
+        data-item="{{ item }}"
+        bindtap="handleItemTap"
+        bindlongpress="handleItemLongPress"
+        hover-class="item-card--hover"
+      >
+        <image
+          class="item-card__cover"
+          src="{{ item.game.cover || item.game.headerImage }}"
+          mode="aspectFill"
+          lazy-load
+        />
+        <view class="item-card__body">
+          <view class="item-card__title">{{ item.game.name }}</view>
+          <view wx:if="{{ item.review }}" class="item-card__review">
+            <text>"{{ item.review }}"</text>
+          </view>
+          <view wx:else class="item-card__placeholder">点击写评价</view>
+
+          <view class="item-card__meta">
+            <view wx:if="{{ item.rating > 0 }}" class="item-card__rating">
+              <text class="item-card__rating-num">{{ item.rating }}</text>
+              <text class="item-card__rating-max">/10</text>
+            </view>
+            <view wx:else class="item-card__no-rating">未评分</view>
+            <view class="item-card__edit">编辑</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="tips">长按卡片可移除游戏</view>
+    </view>
+  </block>
+</view>
+
+<!-- ============ 评价编辑 Modal ============ -->
+<view wx:if="{{ modalVisible }}" class="modal-mask" bindtap="handleCloseModal" catchtouchmove="handleStopPropagation">
+  <view class="modal" catchtap="handleStopPropagation">
+    <!-- 顶部游戏信息 -->
+    <view class="modal__header">
+      <image class="modal__cover" src="{{ editing.gameCover }}" mode="aspectFill" />
+      <view class="modal__title">{{ editing.gameName }}</view>
+    </view>
+
+    <!-- 评分（1-10 颗星） -->
+    <view class="modal__section">
+      <view class="modal__label">我的评分</view>
+      <view class="stars">
+        <view
+          class="star {{ editing.rating >= item ? 'star--active' : '' }}"
+          wx:for="{{ 10 }}"
+          wx:key="*this"
+          data-score="{{ item + 1 }}"
+          bindtap="handleRatingTap"
+        >★</view>
+      </view>
+      <view class="stars__display">
+        <text wx:if="{{ editing.rating > 0 }}" class="stars__value">{{ editing.rating }} / 10</text>
+        <text wx:else class="stars__placeholder">点击星星评分（点击同一颗清除）</text>
+      </view>
+    </view>
+
+    <!-- 评价文字 -->
+    <view class="modal__section">
+      <view class="modal__label">我的评价（可选）</view>
+      <textarea
+        class="modal__textarea"
+        placeholder="写下你对这款游戏的看法，最多 500 字"
+        value="{{ editing.review }}"
+        maxlength="{{ REVIEW_MAX }}"
+        bindinput="handleReviewInput"
+      />
+      <view class="modal__count">{{ reviewLen }} / {{ REVIEW_MAX }}</view>
+    </view>
+
+    <!-- 按钮 -->
+    <view class="modal__actions">
+      <view class="modal__btn modal__btn--cancel" bindtap="handleCloseModal" hover-class="modal__btn--hover">
+        取消
+      </view>
+      <view
+        class="modal__btn modal__btn--primary {{ saving ? 'modal__btn--disabled' : '' }}"
+        bindtap="handleSaveReview"
+        hover-class="modal__btn--hover"
+      >{{ saving ? '保存中…' : '保存' }}</view>
+    </view>
+  </view>
+</view>

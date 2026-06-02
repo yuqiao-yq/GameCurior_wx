@@ -111,6 +111,99 @@ Page({
     this.setData({ showDescriptionAll: !this.data.showDescriptionAll });
   },
 
+  // 加入清单：弹 ActionSheet 选清单
+  async handleAddToList() {
+    const { id, game } = this.data;
+    if (!id || !game) return;
+
+    // 优先看是否来自"添加游戏到指定清单"上下文（搜索/详情页带过来的）
+    let contextListId = '';
+    try {
+      const ctx = wx.getStorageSync('addToList:context');
+      if (ctx && ctx.listId && Date.now() - ctx.timestamp < 5 * 60 * 1000) {
+        contextListId = ctx.listId;
+      }
+    } catch (e) {}
+
+    wx.showLoading({ title: '加载清单', mask: true });
+    let lists = [];
+    try {
+      const data = await cloud.callFunction(
+        'gameList',
+        { action: 'list', page: 1, pageSize: 20 },
+        { showError: false }
+      );
+      lists = data.list || [];
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: '获取清单失败', icon: 'none' });
+      return;
+    }
+    wx.hideLoading();
+
+    // 没有任何清单 → 引导先创建
+    if (lists.length === 0) {
+      wx.showModal({
+        title: '还没有清单',
+        content: '先去创建一个清单吧',
+        confirmText: '去创建',
+        success: (res) => {
+          if (res.confirm) wx.navigateTo({ url: '/pages/mine/lists/edit/edit' });
+        },
+      });
+      return;
+    }
+
+    // 显示 ActionSheet：清单名前加 ✓ 表示已加入
+    let inLists = [];
+    try {
+      const inListData = await cloud.callFunction(
+        'gameListItem',
+        { action: 'inLists', gameId: id },
+        { showError: false }
+      );
+      inLists = (inListData && inListData.listIds) || [];
+    } catch (e) {}
+
+    const itemList = lists.map((l) => `${inLists.includes(l._id) ? '✓ ' : ''}${l.name}`);
+    // 上下文清单置顶并加标记
+    let orderedLists = lists;
+    if (contextListId) {
+      const ctxIdx = lists.findIndex((l) => l._id === contextListId);
+      if (ctxIdx > 0) {
+        orderedLists = [lists[ctxIdx], ...lists.filter((_, i) => i !== ctxIdx)];
+      }
+    }
+
+    wx.showActionSheet({
+      itemList: orderedLists.map((l) => `${inLists.includes(l._id) ? '✓ ' : ''}${l.name}`),
+      success: (res) => {
+        const chosen = orderedLists[res.tapIndex];
+        if (!chosen) return;
+        this.addGameToList(chosen);
+      },
+    });
+  },
+
+  async addGameToList(list) {
+    const { id } = this.data;
+    wx.showLoading({ title: '添加中', mask: true });
+    try {
+      const data = await cloud.callFunction(
+        'gameListItem',
+        { action: 'add', listId: list._id, gameId: id },
+        { showError: false }
+      );
+      wx.hideLoading();
+      const tip = data.isNew ? `已加入「${list.name}」` : `已存在于「${list.name}」`;
+      wx.showToast({ title: tip, icon: 'success' });
+    } catch (err) {
+      wx.hideLoading();
+      const msg = (err && err.message) || '加入失败';
+      wx.showToast({ title: msg, icon: 'none', duration: 2500 });
+    }
+  },
+
   // 跳转到相关游戏
   handleRelatedTap(e) {
     const { id } = e.currentTarget.dataset;

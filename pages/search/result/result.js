@@ -95,10 +95,45 @@ Page({
   },
 
   // 跳详情（本地结果）
-  handleGameTap(e) {
+  // 如果当前处于"加入清单"上下文，则不跳详情而是直接加入
+  async handleGameTap(e) {
     const { id } = e.currentTarget.dataset;
     if (!id) return;
+    const ctx = this.getAddToListContext();
+    if (ctx) {
+      return this.handleQuickAddToList(id, ctx);
+    }
     wx.navigateTo({ url: `/pages/game/detail/detail?id=${id}` });
+  },
+
+  // 读取"加入清单"上下文（5 分钟有效）
+  getAddToListContext() {
+    try {
+      const ctx = wx.getStorageSync('addToList:context');
+      if (ctx && ctx.listId && Date.now() - ctx.timestamp < 5 * 60 * 1000) {
+        return ctx;
+      }
+    } catch (e) {}
+    return null;
+  },
+
+  // 快捷：本地搜索结果直接加入清单
+  async handleQuickAddToList(gameId, ctx) {
+    wx.showLoading({ title: '加入中', mask: true });
+    try {
+      const data = await cloud.callFunction(
+        'gameListItem',
+        { action: 'add', listId: ctx.listId, gameId },
+        { showError: false }
+      );
+      wx.hideLoading();
+      const tip = data.isNew ? `已加入「${ctx.listName}」` : `已存在于「${ctx.listName}」`;
+      wx.showToast({ title: tip, icon: 'success', duration: 1200 });
+    } catch (err) {
+      wx.hideLoading();
+      const msg = (err && err.message) || '加入失败';
+      wx.showToast({ title: msg, icon: 'none', duration: 2500 });
+    }
   },
 
   // 点击外部结果：先导入到本地库，再跳详情

@@ -1,0 +1,9 @@
+{
+  "name": "gameListItem",
+  "version": "1.0.0",
+  "description": "游戏清单内游戏 CRUD + 评价编辑（含内容安全审核）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

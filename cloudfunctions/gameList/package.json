@@ -1,0 +1,9 @@
+{
+  "name": "gameList",
+  "version": "1.0.0",
+  "description": "游戏清单 CRUD：create/update/delete/list/detail",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

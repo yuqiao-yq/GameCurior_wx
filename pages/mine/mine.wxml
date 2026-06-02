@@ -44,6 +44,15 @@
 
   <!-- 菜单 -->
   <view class="menu">
+    <view class="menu__item" bindtap="handleGotoLists" hover-class="menu__item--hover">
+      <view class="menu__icon">📑</view>
+      <view class="menu__title">
+        <view class="menu__main">我的游戏清单</view>
+        <view class="menu__subtitle">自建主题清单，写评价、导出分享图</view>
+      </view>
+      <view class="menu__arrow">›</view>
+    </view>
+
     <view class="menu__item" bindtap="handleGotoFavorites" hover-class="menu__item--hover">
       <view class="menu__icon">⭐</view>
       <view class="menu__title">我的收藏</view>

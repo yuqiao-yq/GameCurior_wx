@@ -17,6 +17,8 @@
 | [`importGame/`](./importGame) | 把外部数据源（CheapShark+Steam Store）的游戏导入本地 games 集合 | 小程序前端调用 |
 | [`favorite/`](./favorite) | 收藏 CRUD（add/remove/list/toggle/updateStatus） | 小程序前端调用 |
 | [`history/`](./history) | 浏览历史 list/clear/remove（report 在 getGameDetail 内完成） | 小程序前端调用 |
+| [`gameList/`](./gameList) | 游戏清单 CRUD（list/detail/create/update/delete，含内容安全审核） | 小程序前端调用 |
+| [`gameListItem/`](./gameListItem) | 清单内游戏 + 评价（add/remove/updateReview/list/inLists） | 小程序前端调用 |
 | [`contentCheck/`](./contentCheck) | 内容安全审核（封装 msgSecCheck V2 + imgSecCheck，需 openapi 权限） | 云函数互调 / 前端 |
 
 ### 数据同步函数（管理端）
@@ -95,6 +97,8 @@ cd cloudfunctions/searchGames && npm install
 cd cloudfunctions/importGame && npm install
 cd cloudfunctions/favorite && npm install
 cd cloudfunctions/history && npm install
+cd cloudfunctions/gameList && npm install
+cd cloudfunctions/gameListItem && npm install
 cd cloudfunctions/contentCheck && npm install
 cd cloudfunctions/initBanners && npm install
 cd cloudfunctions/initGames && npm install

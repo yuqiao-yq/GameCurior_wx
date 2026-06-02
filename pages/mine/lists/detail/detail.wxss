@@ -1,0 +1,353 @@
+/* pages/mine/lists/detail/detail.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 60rpx;
+}
+
+/* ============ Hero 区 ============ */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 380rpx;
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__bg--placeholder {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero__mask {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.hero__content {
+  position: absolute;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 32rpx;
+  color: #ffffff;
+}
+
+.hero__name {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.4);
+}
+
+.hero__desc {
+  font-size: 26rpx;
+  opacity: 0.92;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.4);
+}
+
+.hero__meta {
+  display: flex;
+  gap: 24rpx;
+  font-size: 24rpx;
+  opacity: 0.92;
+}
+
+/* ============ 操作栏 ============ */
+.actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+}
+
+.action {
+  flex: 1;
+  text-align: center;
+  padding: 22rpx 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  background: #ffffff;
+  color: #1f2329;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(31, 35, 41, 0.05);
+}
+
+.action--primary {
+  background: linear-gradient(135deg, #667eea 0%, #5b3aa8 100%);
+  color: #ffffff;
+  box-shadow: 0 6rpx 16rpx rgba(91, 58, 168, 0.25);
+}
+
+.action--hover {
+  opacity: 0.88;
+  transform: scale(0.98);
+}
+
+/* ============ 列表 ============ */
+.empty-wrap {
+  padding-top: 40rpx;
+}
+
+.items {
+  padding: 0 32rpx;
+}
+
+.item-card {
+  display: flex;
+  gap: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.item-card--hover {
+  transform: scale(0.98);
+}
+
+.item-card__cover {
+  width: 140rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  background: #f2f3f5;
+  flex-shrink: 0;
+}
+
+.item-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-card__review {
+  flex: 1;
+  font-size: 24rpx;
+  color: #4e5969;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.item-card__placeholder {
+  flex: 1;
+  font-size: 24rpx;
+  color: #c9cdd4;
+  font-style: italic;
+}
+
+.item-card__meta {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.item-card__rating {
+  display: flex;
+  align-items: baseline;
+  color: #ff7d00;
+  font-weight: 700;
+}
+
+.item-card__rating-num {
+  font-size: 32rpx;
+}
+
+.item-card__rating-max {
+  font-size: 22rpx;
+  margin-left: 2rpx;
+  opacity: 0.7;
+}
+
+.item-card__no-rating {
+  font-size: 22rpx;
+  color: #c9cdd4;
+}
+
+.item-card__edit {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #5b3aa8;
+  padding: 6rpx 16rpx;
+  background: #f2f4ff;
+  border-radius: 16rpx;
+}
+
+.tips {
+  text-align: center;
+  font-size: 22rpx;
+  color: #a9aeb8;
+  padding: 24rpx 0;
+}
+
+/* ============ 评价编辑 Modal ============ */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+}
+
+.modal {
+  width: 100%;
+  max-width: 640rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx 24rpx;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+
+.modal__cover {
+  width: 80rpx;
+  height: 100rpx;
+  border-radius: 8rpx;
+  background: #f2f3f5;
+}
+
+.modal__title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2329;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.modal__section {
+  margin-bottom: 28rpx;
+}
+
+.modal__label {
+  font-size: 26rpx;
+  color: #4e5969;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+/* 星星评分 */
+.stars {
+  display: flex;
+  gap: 8rpx;
+}
+
+.star {
+  flex: 1;
+  text-align: center;
+  font-size: 44rpx;
+  color: #e5e6eb;
+  line-height: 1;
+  padding: 4rpx 0;
+}
+
+.star--active {
+  color: #ff9a23;
+}
+
+.stars__display {
+  margin-top: 8rpx;
+  text-align: center;
+  font-size: 22rpx;
+}
+
+.stars__value {
+  color: #ff7d00;
+  font-weight: 600;
+}
+
+.stars__placeholder {
+  color: #a9aeb8;
+}
+
+/* 评价文本 */
+.modal__textarea {
+  width: 100%;
+  min-height: 200rpx;
+  font-size: 28rpx;
+  color: #1f2329;
+  line-height: 1.6;
+  padding: 16rpx;
+  background: #f6f7fb;
+  border-radius: 12rpx;
+}
+
+.modal__count {
+  text-align: right;
+  font-size: 22rpx;
+  color: #a9aeb8;
+  margin-top: 8rpx;
+}
+
+/* 按钮 */
+.modal__actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.modal__btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.modal__btn--cancel {
+  background: #f2f3f5;
+  color: #86909c;
+}
+
+.modal__btn--primary {
+  background: linear-gradient(135deg, #667eea 0%, #5b3aa8 100%);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.modal__btn--hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.modal__btn--disabled {
+  opacity: 0.5;
+}
