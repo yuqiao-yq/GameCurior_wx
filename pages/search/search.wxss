@@ -1,0 +1,219 @@
+/* pages/search/search.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 40rpx;
+}
+
+/* ============ 搜索栏 ============ */
+.search-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 14rpx 24rpx;
+  background: #f2f3f5;
+  border-radius: 40rpx;
+}
+
+.search-box__icon {
+  font-size: 28rpx;
+  color: #86909c;
+}
+
+.search-box__input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1f2329;
+  min-width: 0;
+  height: 44rpx;
+  line-height: 44rpx;
+}
+
+.search-box__clear {
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 32rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #ffffff;
+  background: #c9cdd4;
+  border-radius: 50%;
+}
+
+.search-box__clear--hover {
+  opacity: 0.75;
+}
+
+.search-cancel {
+  padding-left: 24rpx;
+  font-size: 30rpx;
+  color: #5b3aa8;
+}
+
+.search-cancel--hover {
+  opacity: 0.6;
+}
+
+/* ============ 区块通用 ============ */
+.section {
+  margin: 32rpx 32rpx 0;
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section__title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.section__action {
+  font-size: 26rpx;
+  color: #86909c;
+  padding: 8rpx 12rpx;
+}
+
+.section__action--hover {
+  color: #f53f3f;
+}
+
+.loading,
+.empty {
+  padding: 40rpx 0;
+  text-align: center;
+  color: #86909c;
+  font-size: 26rpx;
+}
+
+/* ============ 标签胶囊 ============ */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  color: #1f2329;
+  background: #ffffff;
+  border-radius: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(31, 35, 41, 0.04);
+}
+
+.tag-pill--hover {
+  background: #f2f4ff;
+  transform: scale(0.98);
+}
+
+.tag-pill__text {
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.tag-pill__close {
+  display: inline-block;
+  width: 32rpx;
+  height: 32rpx;
+  line-height: 28rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #ffffff;
+  background: #c9cdd4;
+  border-radius: 50%;
+  margin-left: 4rpx;
+}
+
+/* 热搜词排名样式 */
+.tag-pill--hot .tag-pill__rank {
+  display: inline-block;
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #ffffff;
+  background: #c9cdd4;
+  border-radius: 50%;
+}
+
+.tag-pill--hot .tag-pill__rank--top {
+  background: linear-gradient(135deg, #ff7d00 0%, #f53f3f 100%);
+}
+
+/* ============ 联想结果 ============ */
+.suggest {
+  margin: 24rpx 32rpx 0;
+  background: #ffffff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.05);
+}
+
+.suggest__item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #f6f7fb;
+}
+
+.suggest__item:last-child {
+  border-bottom: none;
+}
+
+.suggest__item--hover {
+  background: #fafbff;
+}
+
+.suggest__icon {
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.suggest__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggest__name {
+  font-size: 28rpx;
+  color: #1f2329;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggest__name-en {
+  font-size: 22rpx;
+  color: #86909c;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggest__arrow {
+  font-size: 36rpx;
+  color: #c9cdd4;
+  margin-left: 16rpx;
+}

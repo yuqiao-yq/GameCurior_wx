@@ -97,8 +97,7 @@ Page({
   },
 
   handleSearchTap() {
-    wx.showToast({ title: '搜索功能开发中', icon: 'none' });
-    // TODO: 后续做 pages/search/search 页面后改为 navigateTo
+    wx.navigateTo({ url: '/pages/search/search' });
   },
 
   handlePrimaryTap() {

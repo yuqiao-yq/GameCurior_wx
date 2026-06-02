@@ -1,0 +1,100 @@
+<!--pages/search/search.wxml-->
+<view class="page">
+  <!-- 搜索栏 -->
+  <view class="search-header">
+    <view class="search-box">
+      <text class="search-box__icon">🔍</text>
+      <input
+        class="search-box__input"
+        type="text"
+        placeholder="搜索游戏、标签…"
+        confirm-type="search"
+        value="{{ keyword }}"
+        focus="{{ true }}"
+        bindinput="handleInput"
+        bindconfirm="handleConfirm"
+      />
+      <view
+        wx:if="{{ keyword }}"
+        class="search-box__clear"
+        catchtap="handleClearInput"
+        hover-class="search-box__clear--hover"
+      >
+        ×
+      </view>
+    </view>
+    <view class="search-cancel" bindtap="handleCancel" hover-class="search-cancel--hover">取消</view>
+  </view>
+
+  <!-- 联想结果（输入框非空时显示） -->
+  <view wx:if="{{ showSuggest && suggestions.length > 0 }}" class="suggest">
+    <view
+      class="suggest__item"
+      wx:for="{{ suggestions }}"
+      wx:key="_id"
+      data-item="{{ item }}"
+      bindtap="handleSuggestionTap"
+      hover-class="suggest__item--hover"
+    >
+      <text class="suggest__icon">🎮</text>
+      <view class="suggest__content">
+        <view class="suggest__name">{{ item.name }}</view>
+        <view wx:if="{{ item.nameEn && item.nameEn !== item.name }}" class="suggest__name-en">{{ item.nameEn }}</view>
+      </view>
+      <text class="suggest__arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 历史 + 热搜（输入框为空时显示） -->
+  <block wx:if="{{ !showSuggest }}">
+    <!-- 搜索历史 -->
+    <view wx:if="{{ history.length > 0 }}" class="section">
+      <view class="section__header">
+        <text class="section__title">搜索历史</text>
+        <view class="section__action" bindtap="handleClearHistory" hover-class="section__action--hover">
+          清空
+        </view>
+      </view>
+      <view class="tags">
+        <view
+          class="tag-pill tag-pill--history"
+          wx:for="{{ history }}"
+          wx:key="*this"
+          data-keyword="{{ item }}"
+          bindtap="handleQuickSearch"
+          hover-class="tag-pill--hover"
+        >
+          <text class="tag-pill__text">{{ item }}</text>
+          <view
+            class="tag-pill__close"
+            data-index="{{ index }}"
+            catchtap="handleRemoveHistory"
+          >×</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热搜词 -->
+    <view class="section">
+      <view class="section__header">
+        <text class="section__title">🔥 热搜</text>
+      </view>
+      <view wx:if="{{ loadingHot }}" class="loading">加载中…</view>
+      <view wx:elif="{{ hotKeywords.length === 0 }}" class="empty">暂无热搜</view>
+      <view wx:else class="tags">
+        <view
+          class="tag-pill tag-pill--hot"
+          wx:for="{{ hotKeywords }}"
+          wx:key="*this"
+          data-keyword="{{ item }}"
+          bindtap="handleQuickSearch"
+          hover-class="tag-pill--hover"
+        >
+          <text wx:if="{{ index < 3 }}" class="tag-pill__rank tag-pill__rank--top">{{ index + 1 }}</text>
+          <text wx:else class="tag-pill__rank">{{ index + 1 }}</text>
+          <text class="tag-pill__text">{{ item }}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

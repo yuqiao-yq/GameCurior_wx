@@ -10,6 +10,9 @@
 |---|---|---|
 | [`login/`](./login) | 微信登录，自动建档 | 小程序前端调用 |
 | [`getGameList/`](./getGameList) | 首页游戏列表（含 mock 兜底） | 小程序前端调用 |
+| [`getGameDetail/`](./getGameDetail) | 游戏详情 + 浏览历史上报 + 相关推荐 | 小程序前端调用 |
+| [`searchGames/`](./searchGames) | 搜索游戏（search/hot/suggest 三 action） | 小程序前端调用 |
+| [`favorite/`](./favorite) | 收藏 CRUD（add/remove/list/toggle/updateStatus） | 小程序前端调用 |
 
 ### 数据同步函数（管理端）
 
@@ -36,10 +39,14 @@
 ```bash
 cd cloudfunctions/login && npm install
 cd cloudfunctions/getGameList && npm install
+cd cloudfunctions/getGameDetail && npm install
+cd cloudfunctions/searchGames && npm install
+cd cloudfunctions/favorite && npm install
 cd cloudfunctions/initGames && npm install
 cd cloudfunctions/syncFromSteamSpy && npm install
 cd cloudfunctions/syncFromCheapShark && npm install
 cd cloudfunctions/syncFromRAWG && npm install
+cd cloudfunctions/syncFromSteamStore && npm install
 cd cloudfunctions/syncAllSources && npm install
 ```
 

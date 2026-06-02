@@ -1,0 +1,69 @@
+<!--pages/search/result/result.wxml-->
+<view class="page">
+  <!-- 顶部：可点击的搜索框（回到搜索页编辑） + 排序 Tab -->
+  <view class="header">
+    <view class="header__search" bindtap="handleEditKeyword" hover-class="header__search--hover">
+      <text class="header__search-icon">🔍</text>
+      <text class="header__search-text">{{ keyword }}</text>
+      <text class="header__search-edit">修改</text>
+    </view>
+
+    <view class="sort-tabs">
+      <view
+        class="sort-tab {{ sort === item.key ? 'sort-tab--active' : '' }}"
+        wx:for="{{ sortTabs }}"
+        wx:key="key"
+        data-key="{{ item.key }}"
+        bindtap="handleSortChange"
+      >
+        {{ item.label }}
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中（首次） -->
+  <view wx:if="{{ !inited && loading }}" class="loading">
+    搜索中…
+  </view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{ inited && list.length === 0 }}" class="empty">
+    <view class="empty__icon">🔍</view>
+    <view class="empty__title">没有找到「{{ keyword }}」相关游戏</view>
+    <view class="empty__desc">换个关键词试试，或浏览推荐分类</view>
+  </view>
+
+  <!-- 结果列表 -->
+  <view wx:else class="game-list">
+    <view
+      class="game-card"
+      wx:for="{{ list }}"
+      wx:key="_id"
+      data-id="{{ item._id }}"
+      bindtap="handleGameTap"
+      hover-class="game-card--hover"
+    >
+      <image
+        class="game-card__cover"
+        src="{{ item.cover || item.headerImage }}"
+        mode="aspectFill"
+        lazy-load
+      />
+      <view class="game-card__body">
+        <view class="game-card__title">{{ item.name }}</view>
+        <view wx:if="{{ item.description }}" class="game-card__desc">{{ item.description }}</view>
+        <view class="game-card__meta">
+          <view wx:if="{{ item.rating }}" class="game-card__rating">⭐ {{ item.rating }}</view>
+          <view wx:if="{{ item.price }}" class="game-card__price">¥{{ item.price }}</view>
+        </view>
+        <view wx:if="{{ item.tags && item.tags.length }}" class="game-card__tags">
+          <text class="tag" wx:for="{{ item.tags }}" wx:for-item="tag" wx:key="*this" wx:for-index="i" wx:if="{{ i < 4 }}">{{ tag }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多状态 -->
+    <view wx:if="{{ loading && list.length > 0 }}" class="loading">加载中…</view>
+    <view wx:elif="{{ !hasMore && list.length > 0 }}" class="loading">— 没有更多了 —</view>
+  </view>
+</view>

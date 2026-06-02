@@ -5,7 +5,9 @@
     "pages/category/category",
     "pages/mine/mine",
     "pages/game/detail/detail",
-    "pages/mine/favorites/favorites"
+    "pages/mine/favorites/favorites",
+    "pages/search/search",
+    "pages/search/result/result"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,0 +1,9 @@
+{
+  "name": "searchGames",
+  "version": "1.0.0",
+  "description": "搜索游戏：关键词模糊匹配 + 热搜词 + 搜索联想",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
