@@ -1,0 +1,68 @@
+<!--pages/mine/mine.wxml-->
+<view class="page">
+  <!-- 头部用户信息 -->
+  <view class="header">
+    <view class="header__bg"></view>
+    <view class="header__content">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="handleChooseAvatar"
+        hover-class="avatar-btn--hover"
+      >
+        <image
+          class="avatar"
+          src="{{ user.avatar || 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e5e6eb%22/><text x=%2250%22 y=%2258%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%23ffffff%22>?</text></svg>' }}"
+          mode="aspectFill"
+        />
+      </button>
+
+      <view class="user-info">
+        <view class="user-info__name">{{ user.nickname || '玩家' }}</view>
+        <view class="user-info__openid">openid: {{ openid }}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="stats">
+    <view class="stats__item" bindtap="handleGotoFavorites" hover-class="stats__item--hover">
+      <view class="stats__num">{{ stats.favCount }}+</view>
+      <view class="stats__label">我的收藏</view>
+    </view>
+    <view class="stats__divider"></view>
+    <view class="stats__item" bindtap="handleGotoHistory" hover-class="stats__item--hover">
+      <view class="stats__num">-</view>
+      <view class="stats__label">浏览历史</view>
+    </view>
+  </view>
+
+  <!-- 菜单 -->
+  <view class="menu">
+    <view class="menu__item" bindtap="handleGotoFavorites" hover-class="menu__item--hover">
+      <view class="menu__icon">⭐</view>
+      <view class="menu__title">我的收藏</view>
+      <view class="menu__arrow">›</view>
+    </view>
+
+    <view class="menu__item" bindtap="handleGotoHistory" hover-class="menu__item--hover">
+      <view class="menu__icon">🕐</view>
+      <view class="menu__title">浏览历史</view>
+      <view class="menu__arrow">›</view>
+    </view>
+
+    <view class="menu__item" bindtap="handleGotoSetting" hover-class="menu__item--hover">
+      <view class="menu__icon">⚙️</view>
+      <view class="menu__title">设置</view>
+      <view class="menu__arrow">›</view>
+    </view>
+
+    <view class="menu__item" bindtap="handleAbout" hover-class="menu__item--hover">
+      <view class="menu__icon">ℹ️</view>
+      <view class="menu__title">关于我们</view>
+      <view class="menu__arrow">›</view>
+    </view>
+  </view>
+
+  <view class="footer">GameCurior · v0.1.0</view>
+</view>

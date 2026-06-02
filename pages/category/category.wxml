@@ -1,0 +1,30 @@
+<!--pages/category/category.wxml-->
+<view class="page">
+  <view class="header">
+    <view class="header__title">游戏分类</view>
+    <view class="header__desc">按类型寻找你喜欢的好游戏</view>
+  </view>
+
+  <view wx:if="{{ loading }}" class="loading">加载中…</view>
+
+  <view wx:elif="{{ categories.length === 0 }}" class="empty">
+    <view class="empty__icon">📭</view>
+    <view class="empty__text">还没有分类数据</view>
+    <view class="empty__hint">请先在云开发控制台跑 initGames 云函数</view>
+  </view>
+
+  <view wx:else class="grid">
+    <view
+      class="cat-card"
+      wx:for="{{ categories }}"
+      wx:key="_id"
+      data-id="{{ item._id }}"
+      data-name="{{ item.name }}"
+      bindtap="handleCategoryTap"
+      hover-class="cat-card--hover"
+    >
+      <view class="cat-card__icon">{{ item.icon }}</view>
+      <view class="cat-card__name">{{ item.name }}</view>
+    </view>
+  </view>
+</view>

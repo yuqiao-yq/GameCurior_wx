@@ -1,0 +1,350 @@
+/* pages/game/detail/detail.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 140rpx;
+  box-sizing: border-box;
+}
+
+.loading-state,
+.empty-state {
+  padding: 200rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+  color: #86909c;
+}
+
+/* ============ Hero 头图 ============ */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 480rpx;
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.hero__content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 32rpx;
+  color: #ffffff;
+}
+
+.hero__title {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+}
+
+.hero__title-en {
+  font-size: 24rpx;
+  opacity: 0.85;
+  margin-bottom: 16rpx;
+}
+
+.hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.hero__rating {
+  font-size: 28rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.hero__platforms {
+  display: flex;
+  gap: 8rpx;
+  flex-wrap: wrap;
+}
+
+.platform-tag {
+  padding: 2rpx 14rpx;
+  font-size: 20rpx;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 16rpx;
+  color: #ffffff;
+}
+
+/* ============ 卡片通用 ============ */
+.card {
+  background: #ffffff;
+  margin: 20rpx 24rpx;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+/* ============ 价格区 ============ */
+.price-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -40rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.price-current {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #f53f3f;
+}
+
+.price-current--free {
+  color: #00b42a;
+}
+
+.price-current--unknown {
+  font-size: 28rpx;
+  color: #86909c;
+  font-weight: 500;
+}
+
+.price-original {
+  font-size: 22rpx;
+  color: #86909c;
+  text-decoration: line-through;
+}
+
+.price-discount {
+  padding: 4rpx 12rpx;
+  font-size: 20rpx;
+  background: #ffece8;
+  color: #f53f3f;
+  border-radius: 6rpx;
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 12rpx 24rpx;
+  border: 2rpx solid #e5e6eb;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  color: #4e5969;
+  background: #ffffff;
+}
+
+.favorite-btn--active {
+  background: #fff0f0;
+  color: #f53f3f;
+  border-color: #ffc4c4;
+}
+
+.favorite-btn--hover {
+  opacity: 0.7;
+}
+
+.favorite-btn__icon {
+  font-size: 32rpx;
+}
+
+/* ============ 标签云 ============ */
+.tags-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag {
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  background: #f2f4ff;
+  color: #5b3aa8;
+  border-radius: 12rpx;
+}
+
+/* ============ 内容区 ============ */
+.section__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 16rpx;
+}
+
+.section__content {
+  font-size: 26rpx;
+  color: #4e5969;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.section__content--collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.section__toggle {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #5b3aa8;
+  text-align: center;
+}
+
+/* ============ 截图区 ============ */
+.screenshots {
+  white-space: nowrap;
+  margin: 0 -8rpx;
+}
+
+.screenshot-wrapper {
+  display: inline-block;
+  margin: 0 8rpx;
+}
+
+.screenshot {
+  width: 400rpx;
+  height: 225rpx;
+  background: #f2f3f5;
+  border-radius: 12rpx;
+}
+
+/* ============ 基本信息 ============ */
+.info-card .section__title {
+  margin-bottom: 20rpx;
+}
+
+.info-row {
+  display: flex;
+  padding: 12rpx 0;
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+
+.info-row__label {
+  width: 160rpx;
+  color: #86909c;
+  flex-shrink: 0;
+}
+
+.info-row__value {
+  flex: 1;
+  color: #1f2329;
+}
+
+.info-row__value--multiline {
+  white-space: pre-wrap;
+  font-size: 22rpx;
+}
+
+/* ============ 相关游戏 ============ */
+.related {
+  white-space: nowrap;
+  margin: 0 -8rpx;
+}
+
+.related-card {
+  display: inline-block;
+  width: 180rpx;
+  margin: 0 8rpx;
+  vertical-align: top;
+}
+
+.related-card__cover {
+  width: 180rpx;
+  height: 240rpx;
+  background: #f2f3f5;
+  border-radius: 12rpx;
+}
+
+.related-card__name {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #1f2329;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-card__rating {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #ff9a23;
+}
+
+/* ============ 底部固定操作栏 ============ */
+.footer-placeholder {
+  height: 140rpx;
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom)) 24rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #f2f3f5;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.bottom-bar button {
+  flex: 1;
+  margin: 0;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  border: none;
+  padding: 0;
+}
+
+.bottom-bar button::after {
+  border: none;
+}
+
+.bottom-bar__share {
+  flex: 0 0 200rpx;
+  background: #f2f3f5;
+  color: #4e5969;
+}
+
+.bottom-bar__primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+}
+
+.bottom-bar__btn--hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.bottom-bar__icon {
+  margin-right: 6rpx;
+}

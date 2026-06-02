@@ -1,0 +1,171 @@
+/* pages/mine/favorites/favorites.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 60rpx;
+}
+
+/* ============ 顶部 Tab ============ */
+.tabs {
+  display: flex;
+  background: #ffffff;
+  padding: 0 16rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #4e5969;
+  position: relative;
+  transition: color 0.15s;
+}
+
+.tab--active {
+  color: #5b3aa8;
+  font-weight: 600;
+}
+
+.tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 4rpx;
+  background: #5b3aa8;
+  border-radius: 2rpx;
+}
+
+/* ============ 列表 ============ */
+.list {
+  padding: 16rpx;
+}
+
+.fav-card {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  background: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(31, 35, 41, 0.04);
+}
+
+.fav-card--hover {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
+.fav-card__cover {
+  width: 140rpx;
+  height: 180rpx;
+  background: #f2f3f5;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.fav-card__body {
+  flex: 1;
+  padding: 0 20rpx;
+  min-width: 0;
+}
+
+.fav-card__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fav-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.fav-card__rating {
+  font-size: 24rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.fav-card__price {
+  font-size: 24rpx;
+  color: #f53f3f;
+  font-weight: 600;
+}
+
+.fav-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.tag {
+  padding: 2rpx 12rpx;
+  font-size: 20rpx;
+  color: #5b3aa8;
+  background: #f2f4ff;
+  border-radius: 10rpx;
+}
+
+/* 状态标签（可点切换）*/
+.fav-card__status {
+  padding: 8rpx 20rpx;
+  font-size: 22rpx;
+  border-radius: 32rpx;
+  color: #ffffff;
+  background: #c9cdd4;
+  flex-shrink: 0;
+}
+
+.fav-card__status--hover {
+  opacity: 0.85;
+}
+
+.status--0 { background: #5b3aa8; }      /* 想玩：紫 */
+.status--1 { background: #00b42a; }      /* 在玩：绿 */
+.status--2 { background: #ff9a23; }      /* 玩过：橙 */
+.status--3 { background: #86909c; }      /* 弃坑：灰 */
+
+/* ============ 空态 ============ */
+.empty {
+  padding: 200rpx 0;
+  text-align: center;
+}
+
+.empty__icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty__text {
+  font-size: 30rpx;
+  color: #1f2329;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.empty__hint {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+/* ============ 底部 ============ */
+.footer-text {
+  padding: 40rpx 0;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a9aeb8;
+}

@@ -1,0 +1,165 @@
+<!--pages/game/detail/detail.wxml-->
+<view class="page">
+  <!-- 加载中 -->
+  <view wx:if="{{ loading }}" class="loading-state">加载中…</view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{ !game }}" class="empty-state">游戏不存在或已下架</view>
+
+  <!-- 详情内容 -->
+  <block wx:else>
+    <!-- Hero 头图 -->
+    <view class="hero">
+      <image
+        class="hero__bg"
+        src="{{ game.headerImage || game.cover }}"
+        mode="aspectFill"
+        lazy-load
+      />
+      <view class="hero__mask"></view>
+      <view class="hero__content">
+        <view class="hero__title">{{ game.name }}</view>
+        <view wx:if="{{ game.nameEn && game.nameEn !== game.name }}" class="hero__title-en">
+          {{ game.nameEn }}
+        </view>
+        <view class="hero__meta">
+          <view class="hero__rating" wx:if="{{ game.rating > 0 }}">
+            ⭐ {{ game.rating }}
+          </view>
+          <view class="hero__platforms">
+            <text wx:for="{{ game.platforms }}" wx:key="*this" class="platform-tag">{{ item }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 价格区 -->
+    <view class="card price-card">
+      <view class="price-card__left">
+        <view wx:if="{{ game.isFree }}" class="price-current price-current--free">免费</view>
+        <view wx:elif="{{ game.price > 0 }}" class="price-block">
+          <view class="price-current">¥{{ game.price }}</view>
+          <view wx:if="{{ game.discount > 0 }}" class="price-original">¥{{ game.originalPrice }}</view>
+          <view wx:if="{{ game.discount > 0 }}" class="price-discount">-{{ game.discount }}%</view>
+        </view>
+        <view wx:else class="price-current price-current--unknown">价格待定</view>
+      </view>
+
+      <view class="price-card__right">
+        <view
+          class="favorite-btn {{ favorited ? 'favorite-btn--active' : '' }}"
+          bindtap="handleToggleFavorite"
+          hover-class="favorite-btn--hover"
+        >
+          <text class="favorite-btn__icon">{{ favorited ? '♥' : '♡' }}</text>
+          <text class="favorite-btn__text">{{ favorited ? '已收藏' : '收藏' }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签云 -->
+    <view wx:if="{{ game.tags && game.tags.length > 0 }}" class="card tags-card">
+      <text wx:for="{{ game.tags }}" wx:key="*this" class="tag">{{ item }}</text>
+    </view>
+
+    <!-- 简介 -->
+    <view wx:if="{{ game.description }}" class="card section">
+      <view class="section__title">简介</view>
+      <view class="section__content">{{ game.description }}</view>
+    </view>
+
+    <!-- 截图区 -->
+    <view wx:if="{{ game.screenshots && game.screenshots.length > 0 }}" class="card section">
+      <view class="section__title">截图</view>
+      <scroll-view scroll-x class="screenshots" enhanced show-scrollbar="{{ false }}">
+        <view
+          wx:for="{{ game.screenshots }}"
+          wx:key="*this"
+          class="screenshot-wrapper"
+          data-index="{{ index }}"
+          bindtap="handlePreviewScreenshot"
+        >
+          <image class="screenshot" src="{{ item }}" mode="aspectFill" lazy-load />
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 详细介绍 -->
+    <view wx:if="{{ game.detailedDescriptionText }}" class="card section">
+      <view class="section__title">详细介绍</view>
+      <view
+        class="section__content {{ showDescriptionAll ? '' : 'section__content--collapsed' }}"
+      >{{ game.detailedDescriptionText }}</view>
+      <view
+        wx:if="{{ game.detailedDescriptionText.length > 200 }}"
+        class="section__toggle"
+        bindtap="handleToggleDescription"
+      >{{ showDescriptionAll ? '收起 ↑' : '展开 ↓' }}</view>
+    </view>
+
+    <!-- 元信息 -->
+    <view class="card section info-card">
+      <view class="section__title">基本信息</view>
+      <view class="info-row" wx:if="{{ game.developer }}">
+        <text class="info-row__label">开发商</text>
+        <text class="info-row__value">{{ game.developer }}</text>
+      </view>
+      <view class="info-row" wx:if="{{ game.publisher }}">
+        <text class="info-row__label">发行商</text>
+        <text class="info-row__value">{{ game.publisher }}</text>
+      </view>
+      <view class="info-row" wx:if="{{ game.releasedAt }}">
+        <text class="info-row__label">发售日</text>
+        <text class="info-row__value">{{ game.releasedAt }}</text>
+      </view>
+      <view class="info-row" wx:if="{{ game.metacritic > 0 }}">
+        <text class="info-row__label">Metacritic</text>
+        <text class="info-row__value">{{ game.metacritic }} / 100</text>
+      </view>
+      <view class="info-row" wx:if="{{ game.supportedLanguages }}">
+        <text class="info-row__label">支持语言</text>
+        <text class="info-row__value info-row__value--multiline">{{ game.supportedLanguages }}</text>
+      </view>
+    </view>
+
+    <!-- 相关游戏 -->
+    <view wx:if="{{ related.length > 0 }}" class="card section">
+      <view class="section__title">相关推荐</view>
+      <scroll-view scroll-x class="related" enhanced show-scrollbar="{{ false }}">
+        <view
+          class="related-card"
+          wx:for="{{ related }}"
+          wx:key="_id"
+          data-id="{{ item._id }}"
+          bindtap="handleRelatedTap"
+        >
+          <image class="related-card__cover" src="{{ item.cover }}" mode="aspectFill" lazy-load />
+          <view class="related-card__name">{{ item.name }}</view>
+          <view class="related-card__rating">⭐ {{ item.rating }}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 底部安全占位 -->
+    <view class="footer-placeholder"></view>
+
+    <!-- 底部固定操作栏 -->
+    <view class="bottom-bar">
+      <button
+        class="bottom-bar__share"
+        open-type="share"
+        hover-class="bottom-bar__btn--hover"
+      >
+        <text class="bottom-bar__icon">↗</text>
+        分享
+      </button>
+      <button
+        class="bottom-bar__primary"
+        bindtap="handleVisitStore"
+        hover-class="bottom-bar__btn--hover"
+      >
+        前往 Steam
+      </button>
+    </view>
+  </block>
+</view>

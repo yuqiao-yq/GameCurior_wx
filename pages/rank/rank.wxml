@@ -1,0 +1,24 @@
+<!--pages/rank/rank.wxml-->
+<view class="page">
+  <view class="tabs">
+    <view
+      class="tab {{ activeTab === index ? 'tab--active' : '' }}"
+      wx:for="{{ tabs }}"
+      wx:key="key"
+      data-index="{{ index }}"
+      bindtap="handleTabChange"
+    >{{ item.label }}</view>
+  </view>
+
+  <view class="hero">
+    <view class="hero__icon">{{ tabs[activeTab].label.substring(0, 2) }}</view>
+    <view class="hero__title">{{ tabs[activeTab].label }}</view>
+    <view class="hero__desc">{{ tabs[activeTab].desc }}</view>
+  </view>
+
+  <view class="empty">
+    <view class="empty__icon">🚧</view>
+    <view class="empty__text">榜单功能开发中</view>
+    <view class="empty__hint">敬请期待</view>
+  </view>
+</view>

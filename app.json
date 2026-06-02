@@ -1,6 +1,11 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/rank/rank",
+    "pages/category/category",
+    "pages/mine/mine",
+    "pages/game/detail/detail",
+    "pages/mine/favorites/favorites"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -8,6 +13,38 @@
     "navigationBarTitleText": "GameCurior",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f6f7fb"
+  },
+  "tabBar": {
+    "color": "#86909c",
+    "selectedColor": "#5b3aa8",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tabbar/home_normal.png",
+        "selectedIconPath": "images/tabbar/home_active.png"
+      },
+      {
+        "pagePath": "pages/rank/rank",
+        "text": "榜单",
+        "iconPath": "images/tabbar/rank_normal.png",
+        "selectedIconPath": "images/tabbar/rank_active.png"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类",
+        "iconPath": "images/tabbar/category_normal.png",
+        "selectedIconPath": "images/tabbar/category_active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "images/tabbar/mine_normal.png",
+        "selectedIconPath": "images/tabbar/mine_active.png"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

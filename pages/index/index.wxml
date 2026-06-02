@@ -1,5 +1,11 @@
 <!--pages/index/index.wxml-->
 <view class="page">
+  <!-- 顶部搜索框 -->
+  <view class="search-bar" bindtap="handleSearchTap" hover-class="search-bar--hover">
+    <text class="search-bar__icon">🔍</text>
+    <text class="search-bar__placeholder">搜索游戏、标签…</text>
+  </view>
+
   <!-- 顶部 Hero 区域 -->
   <view class="hero">
     <view class="hero__badge">Beta</view>
@@ -9,8 +15,6 @@
     <button class="hero__btn" bindtap="handlePrimaryTap" hover-class="hero__btn--hover">
       立即开始
     </button>
-
-    <view wx:if="{{ openid }}" class="hero__openid">openid: {{ openid }}</view>
   </view>
 
   <!-- 功能卡片 -->

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>GameCurior TabBar 图标生成器</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    background: #1f2329;
+    color: #ffffff;
+    margin: 0;
+    padding: 40px;
+  }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  .desc { color: #86909c; margin-bottom: 32px; line-height: 1.6; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .icon-card {
+    background: #2a2f3a;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .icon-card h3 { margin: 0 0 16px; font-size: 16px; }
+  .icon-row { display: flex; gap: 16px; justify-content: center; align-items: center; }
+  .icon-row > div { text-align: center; }
+  .icon-row span { display: block; font-size: 12px; color: #86909c; margin-top: 8px; }
+  canvas {
+    background: #ffffff;
+    border-radius: 8px;
+    display: block;
+  }
+  button {
+    background: #5b3aa8;
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover { background: #6d4ec2; }
+  .steps {
+    background: #2a2f3a;
+    padding: 24px;
+    border-radius: 12px;
+    margin-top: 32px;
+    line-height: 1.8;
+  }
+  .steps code {
+    background: #1f2329;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #7dd3fc;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+  <h1>🎮 GameCurior TabBar 图标生成器</h1>
+  <p class="desc">
+    一键生成 8 张 PlayStation 风格的 TabBar 图标（4 个 Tab × 选中/未选中）。
+    点击下方按钮自动下载所有 PNG。
+  </p>
+
+  <div class="grid" id="grid"></div>
+
+  <button onclick="downloadAll()">📥 一键下载全部 8 张图标（ZIP）</button>
+  <button onclick="downloadOneByOne()" style="margin-left: 12px; background: #4e5969;">逐个下载</button>
+
+  <div class="steps">
+    <h3 style="margin-top:0;">📋 接下来怎么做</h3>
+    <ol>
+      <li>点上方按钮下载 8 张 PNG（或下载 ZIP 后解压）</li>
+      <li>在项目根目录创建文件夹 <code>images/tabbar/</code></li>
+      <li>把 8 张 PNG 全部放进 <code>images/tabbar/</code> 目录</li>
+      <li>回到 Codewiz，告诉我「图标放好了」，我会自动配置 <code>app.json</code></li>
+    </ol>
+    <p style="color: #86909c; margin-top: 16px;">
+      文件命名（已固定）：home / rank / category / mine + _normal / _active
+    </p>
+  </div>
+
+<script>
+// 4 个 Tab 的配置：PS 风格形状 + 统一淡紫色选中态
+// 选中色与品牌主色 #5b3aa8 协调
+const ACTIVE_COLOR = '#8b5cf6';   // 选中：淡紫色
+const NORMAL_COLOR = '#999999';   // 未选中：灰色
+
+const ICONS = [
+  { name: 'home',     shape: 'circle',   color: ACTIVE_COLOR, label: '首页 ○ 圆' },
+  { name: 'rank',     shape: 'triangle', color: ACTIVE_COLOR, label: '榜单 △ 三角' },
+  { name: 'category', shape: 'cross',    color: ACTIVE_COLOR, label: '分类 ✕ 叉' },
+  { name: 'mine',     shape: 'square',   color: ACTIVE_COLOR, label: '我的 □ 方块' },
+];
+
+const ICON_SIZE = 81; // 微信推荐 81×81
+
+function drawIcon(canvas, shape, color) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = w * 0.32;
+  const lineW = w * 0.08;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineW;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  switch (shape) {
+    case 'circle':
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    case 'triangle': {
+      const r2 = r * 1.05;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r2);
+      ctx.lineTo(cx + r2 * Math.cos(Math.PI / 6), cy + r2 * Math.sin(Math.PI / 6));
+      ctx.lineTo(cx - r2 * Math.cos(Math.PI / 6), cy + r2 * Math.sin(Math.PI / 6));
+      ctx.closePath();
+      ctx.stroke();
+      break;
+    }
+    case 'square': {
+      const s = r * 1.7;
+      ctx.beginPath();
+      ctx.rect(cx - s / 2, cy - s / 2, s, s);
+      ctx.stroke();
+      break;
+    }
+    case 'cross': {
+      const r2 = r * 0.95;
+      ctx.beginPath();
+      ctx.moveTo(cx - r2, cy - r2);
+      ctx.lineTo(cx + r2, cy + r2);
+      ctx.moveTo(cx + r2, cy - r2);
+      ctx.lineTo(cx - r2, cy + r2);
+      ctx.stroke();
+      break;
+    }
+  }
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  ICONS.forEach(icon => {
+    const card = document.createElement('div');
+    card.className = 'icon-card';
+    card.innerHTML = `
+      <h3>${icon.label}</h3>
+      <div class="icon-row">
+        <div>
+          <canvas id="${icon.name}_normal" width="${ICON_SIZE}" height="${ICON_SIZE}"></canvas>
+          <span>${icon.name}_normal.png</span>
+        </div>
+        <div>
+          <canvas id="${icon.name}_active" width="${ICON_SIZE}" height="${ICON_SIZE}"></canvas>
+          <span>${icon.name}_active.png</span>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    drawIcon(document.getElementById(`${icon.name}_normal`), icon.shape, NORMAL_COLOR);
+    drawIcon(document.getElementById(`${icon.name}_active`), icon.shape, icon.color);
+  });
+}
+
+function downloadCanvas(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function downloadOneByOne() {
+  ICONS.forEach((icon, i) => {
+    setTimeout(() => {
+      downloadCanvas(document.getElementById(`${icon.name}_normal`), `${icon.name}_normal.png`);
+    }, i * 400);
+    setTimeout(() => {
+      downloadCanvas(document.getElementById(`${icon.name}_active`), `${icon.name}_active.png`);
+    }, i * 400 + 200);
+  });
+}
+
+// 简单 zip：直接逐张下载（避免引入第三方库）
+function downloadAll() {
+  downloadOneByOne();
+}
+
+renderGrid();
+</script>
+</body>
+</html>

@@ -7,9 +7,9 @@ Page({
     appName: 'GameCurior',
     slogan: '发现你感兴趣的好玩游戏',
     features: [
-      { icon: '🎮', title: '游戏推荐', desc: '为你精选每日好游戏' },
-      { icon: '🔥', title: '热门榜单', desc: '查看当下最热门的作品' },
-      { icon: '⭐', title: '我的收藏', desc: '收藏喜欢的游戏随时查看' },
+      { icon: '🔥', title: '热门榜单', desc: '查看当下最热门的作品', action: 'rank' },
+      { icon: '🏷️', title: '游戏分类', desc: '按类型寻找好游戏', action: 'category' },
+      { icon: '⭐', title: '我的收藏', desc: '收藏喜欢的游戏随时查看', action: 'favorites' },
     ],
     games: [],     // 云函数返回的游戏列表
     loading: true,
@@ -50,7 +50,8 @@ Page({
     try {
       const data = await cloud.callFunction(
         'getGameList',
-        { page: 1, pageSize: 10, sort: 'rating' },
+        // TODO: 后续做列表页 / 榜单页后，首页 pageSize 改回 10，加"查看更多"跳转
+        { page: 1, pageSize: 50, sort: 'rating' },
         { showError: false }
       );
       this.setData({
@@ -78,10 +79,26 @@ Page({
   handleFeatureTap(e) {
     const { index } = e.currentTarget.dataset;
     const item = this.data.features[index];
-    wx.showToast({
-      title: `点击了：${item.title}`,
-      icon: 'none',
-    });
+
+    // 路由分发：TabBar 页面用 switchTab，普通页面用 navigateTo
+    switch (item.action) {
+      case 'rank':
+        wx.switchTab({ url: '/pages/rank/rank' });
+        break;
+      case 'category':
+        wx.switchTab({ url: '/pages/category/category' });
+        break;
+      case 'favorites':
+        wx.navigateTo({ url: '/pages/mine/favorites/favorites' });
+        break;
+      default:
+        wx.showToast({ title: `${item.title} 功能开发中`, icon: 'none' });
+    }
+  },
+
+  handleSearchTap() {
+    wx.showToast({ title: '搜索功能开发中', icon: 'none' });
+    // TODO: 后续做 pages/search/search 页面后改为 navigateTo
   },
 
   handlePrimaryTap() {
@@ -91,12 +108,16 @@ Page({
     });
   },
 
+
+
   handleGameTap(e) {
     const { game } = e.currentTarget.dataset;
-    wx.showToast({
-      title: `查看 ${game.name}`,
-      icon: 'none',
+    if (!game || !game._id) {
+      wx.showToast({ title: '游戏信息异常', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/game/detail/detail?id=${game._id}`,
     });
-    // 后续：wx.navigateTo({ url: `/pages/game/detail?id=${game._id}` })
   },
 });

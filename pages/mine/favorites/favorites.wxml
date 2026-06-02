@@ -1,0 +1,55 @@
+<!--pages/mine/favorites/favorites.wxml-->
+<view class="page">
+  <!-- 顶部 Tab 切换 -->
+  <view class="tabs">
+    <view
+      class="tab {{ activeTab === index ? 'tab--active' : '' }}"
+      wx:for="{{ tabs }}"
+      wx:key="label"
+      data-index="{{ index }}"
+      bindtap="handleTabChange"
+    >{{ item.label }}</view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list" wx:if="{{ list.length > 0 }}">
+    <view
+      class="fav-card"
+      wx:for="{{ list }}"
+      wx:key="_id"
+      data-game-id="{{ item.gameId }}"
+      bindtap="handleItemTap"
+      hover-class="fav-card--hover"
+    >
+      <image class="fav-card__cover" src="{{ item.game.cover }}" mode="aspectFill" lazy-load />
+      <view class="fav-card__body">
+        <view class="fav-card__name">{{ item.game.name }}</view>
+        <view class="fav-card__meta">
+          <text class="fav-card__rating">⭐ {{ item.game.rating }}</text>
+          <text wx:if="{{ item.game.price > 0 }}" class="fav-card__price">¥{{ item.game.price }}</text>
+        </view>
+        <view class="fav-card__tags">
+          <text class="tag" wx:for="{{ item.game.tags }}" wx:key="*this" wx:for-item="tag" wx:if="{{ index < 3 }}">{{ tag }}</text>
+        </view>
+      </view>
+      <view
+        class="fav-card__status status--{{ item.status }}"
+        catchtap="handleChangeStatus"
+        data-game-id="{{ item.gameId }}"
+        data-current-status="{{ item.status }}"
+        hover-class="fav-card__status--hover"
+      >{{ item.statusName }}</view>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{ !loading }}" class="empty">
+    <view class="empty__icon">🎮</view>
+    <view class="empty__text">还没有收藏哦</view>
+    <view class="empty__hint">去首页发现好游戏吧</view>
+  </view>
+
+  <!-- 底部状态 -->
+  <view wx:if="{{ list.length > 0 && !hasMore }}" class="footer-text">— 到底啦 —</view>
+  <view wx:if="{{ loading }}" class="footer-text">加载中…</view>
+</view>
