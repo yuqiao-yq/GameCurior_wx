@@ -1,6 +1,7 @@
 // pages/mine/lists/edit/edit.js
 // 清单创建 / 编辑：名称、简介、封面（自定义上传）
 const cloud = require('../../../../utils/cloud.js');
+const app = getApp();
 
 const NAME_MAX = 30;
 const DESC_MAX = 200;
@@ -23,6 +24,9 @@ Page({
   },
 
   onLoad(options = {}) {
+    // 确保已登录拿到 openid（用于云存储上传路径，避开公共目录权限问题）
+    this.ensureLogin();
+
     const { id } = options;
     if (id) {
       this.setData({ isEdit: true, id });
@@ -30,6 +34,20 @@ Page({
       this.fetchDetail(id);
     } else {
       wx.setNavigationBarTitle({ title: '新建清单' });
+    }
+  },
+
+  // 确保有 openid，避免上传走公共目录被权限拦截
+  async ensureLogin() {
+    if (app.globalData && app.globalData.openid) return;
+    try {
+      const data = await cloud.callFunction('login', {}, { showError: false });
+      if (app.globalData && data) {
+        app.globalData.openid = data.openid;
+        app.globalData.userInfo = data.user;
+      }
+    } catch (e) {
+      // 静默
     }
   },
 
@@ -69,6 +87,7 @@ Page({
   },
 
   // 选 + 上传封面
+  // 路径策略：list-covers/{openid}/xxx.jpg，避开公共根目录权限
   async handleChooseCover() {
     try {
       const choose = await new Promise((resolve, reject) => {
@@ -84,8 +103,15 @@ Page({
       const tempPath = choose.tempFiles && choose.tempFiles[0] && choose.tempFiles[0].tempFilePath;
       if (!tempPath) return;
 
+      // 确保有 openid
+      await this.ensureLogin();
+      const openid = (app.globalData && app.globalData.openid) || 'anon';
+
       wx.showLoading({ title: '上传中', mask: true });
-      const cloudPath = `list-cover/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const ts = Date.now();
+      const rand = Math.random().toString(36).slice(2, 8);
+      // 关键：openid 作为目录前缀，云存储默认安全规则就能匹配"自己的目录"
+      const cloudPath = `list-covers/${openid}/${ts}_${rand}.jpg`;
       const fileID = await cloud.uploadFile(cloudPath, tempPath);
       this.setData({ 'form.cover': fileID });
       wx.hideLoading();
@@ -93,8 +119,30 @@ Page({
     } catch (e) {
       wx.hideLoading();
       if (e && e.errMsg && e.errMsg.includes('cancel')) return;
-      wx.showToast({ title: '上传失败', icon: 'none' });
+
+      // 打印详细错误，便于排查
+      console.error('[lists/edit] uploadCover fail:', e);
+      const detail = (e && (e.errMsg || e.message)) || '未知错误';
+      let tip = '上传失败';
+      if (/permission/i.test(detail)) {
+        tip = '云存储无写权限，请检查权限规则';
+      } else if (/upload\s*fail/i.test(detail) || /timeout/i.test(detail)) {
+        tip = '上传失败，请检查网络';
+      } else if (/cloud function service error/i.test(detail)) {
+        tip = '云开发未就绪';
+      }
+      wx.showModal({
+        title: tip,
+        content: `详细信息：${detail}`,
+        showCancel: false,
+      });
     }
+  },
+
+  // 封面图加载失败时给出提示
+  handleCoverError(e) {
+    console.warn('[lists/edit] cover image load failed:', e.detail);
+    // 不自动清空，让用户能看到 fileID 已上传成功（仅预览失败）
   },
 
   handleRemoveCover() {

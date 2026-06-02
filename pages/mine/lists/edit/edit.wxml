@@ -8,6 +8,7 @@
         class="cover-img"
         src="{{ form.cover }}"
         mode="aspectFill"
+        binderror="handleCoverError"
       />
       <view wx:else class="cover-placeholder">
         <text class="cover-placeholder__icon">📸</text>
@@ -55,13 +56,10 @@
 
   <!-- 提交按钮 -->
   <view class="footer">
-    <button
+    <view
       class="submit-btn {{ submitting ? 'submit-btn--disabled' : '' }}"
       bindtap="handleSubmit"
-      disabled="{{ submitting }}"
       hover-class="submit-btn--hover"
-    >
-      {{ isEdit ? '保存修改' : '创建清单' }}
-    </button>
+    >{{ isEdit ? '保存修改' : '创建清单' }}</view>
   </view>
 </view>

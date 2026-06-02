@@ -14,6 +14,31 @@ const MAX_LISTS_PER_USER = 20;
 const NAME_MAX = 30;
 const DESC_MAX = 200;
 
+// 集合不存在时自动创建（避免新环境首次使用报错）
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name);
+    console.log('[gameList] auto-created collection:', name);
+  } catch (e) {
+    // -501001 = collection already exist；忽略
+    if (e.errCode === -501001 || /already exist/i.test(e.errMsg || e.message || '')) {
+      return;
+    }
+    console.warn('[gameList] createCollection failed:', e.message);
+  }
+}
+
+// 入口处主动 ensure（首次启动幂等）
+let _ensured = false;
+async function ensureCollections() {
+  if (_ensured) return;
+  await Promise.all([
+    ensureCollection('gameLists'),
+    ensureCollection('gameListItems'),
+  ]);
+  _ensured = true;
+}
+
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
   const { action = 'list' } = event;
@@ -21,6 +46,9 @@ exports.main = async (event, context) => {
   if (!OPENID) {
     return { code: 1002, message: '未登录', data: null };
   }
+
+  // 首次启动：确保集合存在
+  try { await ensureCollections(); } catch (e) {}
 
   try {
     switch (action) {

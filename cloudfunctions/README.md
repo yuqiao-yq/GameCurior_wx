@@ -127,6 +127,16 @@ cd cloudfunctions/syncAllSources && npm install
 | `banners` | 所有用户可读，仅管理端可写 |
 | `favorites` | 仅创建者可读写 |
 | `history` | 仅创建者可读写 |
+| `gameLists` | 仅创建者可读写（首次使用 gameList 云函数会自动创建） |
+| `gameListItems` | 仅创建者可读写（首次使用 gameList 云函数会自动创建） |
+
+> 💡 **gameLists / gameListItems 自动创建**：这两个集合若不存在，[`gameList`](./gameList) 和 [`gameListItem`](./gameListItem) 云函数会在首次调用时自动 createCollection。但需要手动在控制台**确认权限规则**为「仅创建者可读写」，否则可能读到他人数据。
+
+> 💡 **云存储路径规范**：用户上传的图片（头像、清单封面等）建议存到 `{业务}/{openid}/{filename}` 路径下，能匹配云存储默认安全规则「仅创建者可读写」。当前实现：
+> - 头像：`avatar/{openid}_{ts}.jpg`
+> - 清单封面：`list-covers/{openid}/{ts}_{rand}.jpg`
+>
+> 如遇到上传/读取报权限错，请到控制台 → 云存储 → 权限设置确认是否允许该路径。
 
 > 详细说明见 [`docs/DESIGN.md` §7.4](../docs/DESIGN.md)。
 

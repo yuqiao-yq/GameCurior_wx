@@ -15,6 +15,28 @@ const REVIEW_MAX = 500;
 const RATING_MIN = 0;     // 0 表示未评分
 const RATING_MAX = 10;
 
+// 集合自动初始化（与 gameList 函数共用，幂等）
+let _ensured = false;
+async function ensureCollections() {
+  if (_ensured) return;
+  const names = ['gameLists', 'gameListItems'];
+  await Promise.all(
+    names.map(async (n) => {
+      try {
+        await db.createCollection(n);
+      } catch (e) {
+        if (
+          e.errCode !== -501001 &&
+          !/already exist/i.test(e.errMsg || e.message || '')
+        ) {
+          console.warn('[gameListItem] createCollection failed:', n, e.message);
+        }
+      }
+    })
+  );
+  _ensured = true;
+}
+
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
   const { action = 'list' } = event;
@@ -22,6 +44,8 @@ exports.main = async (event, context) => {
   if (!OPENID) {
     return { code: 1002, message: '未登录', data: null };
   }
+
+  try { await ensureCollections(); } catch (e) {}
 
   try {
     switch (action) {
