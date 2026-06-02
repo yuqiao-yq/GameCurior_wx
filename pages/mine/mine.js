@@ -37,10 +37,30 @@ Page({
 
       // 查收藏数（不阻塞，错误忽略）
       this.fetchStats();
+
+      // 拉一次最新的 userProfile（覆盖 login 返回的可能过时数据）
+      this.fetchProfile();
     } catch (err) {
       console.warn('mine onLoad fail:', err);
     } finally {
       this.setData({ loading: false });
+    }
+  },
+
+  // 拉最新的用户资料（兜底）
+  async fetchProfile() {
+    try {
+      const data = await cloud.callFunction(
+        'userProfile',
+        { action: 'get' },
+        { showError: false }
+      );
+      if (data && data.user) {
+        this.setData({ user: data.user });
+        app.globalData.userInfo = data.user;
+      }
+    } catch (e) {
+      // 忽略
     }
   },
 
@@ -85,28 +105,90 @@ Page({
   },
 
   // 用户信息编辑头像（小程序新规范用 chooseAvatar）
+  // 1. 上传到云存储
+  // 2. 调 userProfile.update 保存到云端
   async handleChooseAvatar(e) {
     const { avatarUrl } = e.detail;
     if (!avatarUrl) return;
-    // 上传头像到云存储
+
+    const originalAvatar = this.data.user && this.data.user.avatar;
     wx.showLoading({ title: '上传中', mask: true });
     try {
       const cloudPath = `avatar/${this.data.openid}_${Date.now()}.jpg`;
       const fileID = await cloud.uploadFile(cloudPath, avatarUrl);
-      // 本地立刻更新（云端后续做用户信息更新接口）
+      // 乐观更新
       this.setData({ 'user.avatar': fileID });
-      wx.hideLoading();
-      wx.showToast({ title: '头像已更新', icon: 'success' });
+
+      // 保存到云端
+      try {
+        await cloud.callFunction(
+          'userProfile',
+          { action: 'update', avatar: fileID },
+          { showError: false }
+        );
+        wx.hideLoading();
+        wx.showToast({ title: '头像已更新', icon: 'success' });
+      } catch (err) {
+        // 保存失败回滚
+        this.setData({ 'user.avatar': originalAvatar });
+        wx.hideLoading();
+        wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+      }
     } catch (err) {
       wx.hideLoading();
       wx.showToast({ title: '上传失败', icon: 'none' });
     }
   },
 
-  // 输入昵称
-  handleNicknameInput(e) {
-    const { value } = e.detail;
-    this.setData({ 'user.nickname': value });
-    // TODO: 后续做用户信息更新云函数
+  // 点击昵称区域：弹 modal 编辑
+  handleEditNickname() {
+    const current = (this.data.user && this.data.user.nickname) || '';
+    wx.showModal({
+      title: '修改昵称',
+      editable: true,
+      placeholderText: '请输入昵称（最多 24 字）',
+      content: current,
+      confirmText: '保存',
+      confirmColor: '#5b3aa8',
+      success: (res) => {
+        if (res.confirm) {
+          const trimmed = String(res.content || '').trim();
+          if (!trimmed) {
+            wx.showToast({ title: '昵称不能为空', icon: 'none' });
+            return;
+          }
+          if (trimmed === current) return; // 没变
+          this.saveNickname(trimmed, current);
+        }
+      },
+    });
+  },
+
+  // 保存昵称（含内容安全审核）
+  async saveNickname(nickname, original) {
+    // 乐观更新
+    this.setData({ 'user.nickname': nickname });
+    wx.showLoading({ title: '保存中', mask: true });
+    try {
+      const data = await cloud.callFunction(
+        'userProfile',
+        { action: 'update', nickname },
+        { showError: false }
+      );
+      wx.hideLoading();
+      // 校验返回结果
+      if (data && data.user) {
+        this.setData({ user: data.user });
+        app.globalData.userInfo = data.user;
+        wx.showToast({ title: '昵称已更新', icon: 'success' });
+      }
+    } catch (err) {
+      wx.hideLoading();
+      // 回滚
+      this.setData({ 'user.nickname': original });
+      // userProfile 的业务错误（如 1004 违规、1003 长度）会带 message
+      const msg = (err && err.message) || '保存失败';
+      wx.showToast({ title: msg, icon: 'none', duration: 2500 });
+    }
   },
 });

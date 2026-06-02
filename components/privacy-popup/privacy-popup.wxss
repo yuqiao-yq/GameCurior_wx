@@ -1,0 +1,94 @@
+/* components/privacy-popup/privacy-popup.wxss */
+.mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+}
+
+.popup {
+  width: 100%;
+  max-width: 640rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx 32rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.18);
+}
+
+.popup__title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2329;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.popup__body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.popup__paragraph {
+  font-size: 26rpx;
+  color: #4e5969;
+  line-height: 1.7;
+  margin-bottom: 20rpx;
+}
+
+.popup__paragraph--bold {
+  color: #1f2329;
+  font-weight: 500;
+}
+
+.popup__paragraph--muted {
+  color: #86909c;
+  font-size: 24rpx;
+}
+
+.popup__brand {
+  color: #5b3aa8;
+  font-weight: 600;
+}
+
+.popup__link {
+  color: #5b3aa8;
+  text-decoration: underline;
+}
+
+/* 按钮 */
+.popup__actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+
+.popup__btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+  font-weight: 500;
+}
+
+.popup__btn--reject {
+  background: #f2f3f5;
+  color: #86909c;
+}
+
+.popup__btn--agree {
+  background: linear-gradient(135deg, #667eea 0%, #5b3aa8 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 6rpx 16rpx rgba(91, 58, 168, 0.3);
+}
+
+.popup__btn--hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}

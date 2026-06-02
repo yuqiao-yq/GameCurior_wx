@@ -1,4 +1,6 @@
 <!--pages/mine/mine.wxml-->
+<privacy-popup />
+
 <view class="page">
   <!-- 头部用户信息 -->
   <view class="header">
@@ -17,8 +19,11 @@
         />
       </button>
 
-      <view class="user-info">
-        <view class="user-info__name">{{ user.nickname || '玩家' }}</view>
+      <view class="user-info" bindtap="handleEditNickname" hover-class="user-info--hover">
+        <view class="user-info__name">
+          {{ user.nickname || '点击设置昵称' }}
+          <text class="user-info__edit">✎</text>
+        </view>
         <view class="user-info__openid">openid: {{ openid }}</view>
       </view>
     </view>

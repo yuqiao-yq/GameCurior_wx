@@ -1,4 +1,6 @@
 <!--pages/category/category.wxml-->
+<privacy-popup />
+
 <view class="page">
   <view class="header">
     <view class="header__title">游戏分类</view>

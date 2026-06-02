@@ -1,4 +1,6 @@
 <!--pages/rank/rank.wxml-->
+<privacy-popup />
+
 <view class="page">
   <!-- Tab 切换 -->
   <view class="tabs">

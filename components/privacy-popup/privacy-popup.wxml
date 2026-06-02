@@ -1,0 +1,37 @@
+<!--components/privacy-popup/privacy-popup.wxml-->
+<view wx:if="{{ visible }}" class="mask" catchtap="handleStop" catchtouchmove="handleStop">
+  <view class="popup" catchtap="handleStop">
+    <!-- 标题 -->
+    <view class="popup__title">服务协议与隐私政策</view>
+
+    <!-- 正文 -->
+    <view class="popup__body">
+      <view class="popup__paragraph">
+        欢迎使用 <text class="popup__brand">GameCurior</text>！我们非常重视您的隐私和个人信息保护。
+      </view>
+      <view class="popup__paragraph">
+        在您使用本小程序前，请您仔细阅读
+        <text class="popup__link" bindtap="handleViewAgreement">《用户协议》</text>
+        和
+        <text class="popup__link" bindtap="handleViewPrivacy">《隐私政策》</text>
+        。
+      </view>
+      <view class="popup__paragraph popup__paragraph--bold">
+        我们会收集您的微信 OpenID 用于账号识别，收集您的浏览记录与收藏用于个性化展示，不会收集任何与本服务无关的个人信息。
+      </view>
+      <view class="popup__paragraph popup__paragraph--muted">
+        点击"同意并继续"即表示您已阅读并接受上述协议。
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="popup__actions">
+      <view class="popup__btn popup__btn--reject" bindtap="handleReject" hover-class="popup__btn--hover">
+        不同意
+      </view>
+      <view class="popup__btn popup__btn--agree" bindtap="handleAgree" hover-class="popup__btn--hover">
+        同意并继续
+      </view>
+    </view>
+  </view>
+</view>
