@@ -1,0 +1,9 @@
+{
+  "name": "importGame",
+  "version": "1.0.0",
+  "description": "把外部数据源（CheapShark / Steam Store）的游戏导入本地 games 集合",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

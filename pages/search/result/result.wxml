@@ -26,44 +26,94 @@
     搜索中…
   </view>
 
-  <!-- 空态 -->
-  <view wx:elif="{{ inited && list.length === 0 }}" class="empty">
+  <!-- 空态（本地 + 外部都没有） -->
+  <view wx:elif="{{ inited && list.length === 0 && external.length === 0 }}" class="empty">
     <view class="empty__icon">🔍</view>
     <view class="empty__title">没有找到「{{ keyword }}」相关游戏</view>
     <view class="empty__desc">换个关键词试试，或浏览推荐分类</view>
   </view>
 
   <!-- 结果列表 -->
-  <view wx:else class="game-list">
-    <view
-      class="game-card"
-      wx:for="{{ list }}"
-      wx:key="_id"
-      data-id="{{ item._id }}"
-      bindtap="handleGameTap"
-      hover-class="game-card--hover"
-    >
-      <image
-        class="game-card__cover"
-        src="{{ item.cover || item.headerImage }}"
-        mode="aspectFill"
-        lazy-load
-      />
-      <view class="game-card__body">
-        <view class="game-card__title">{{ item.name }}</view>
-        <view wx:if="{{ item.description }}" class="game-card__desc">{{ item.description }}</view>
-        <view class="game-card__meta">
-          <view wx:if="{{ item.rating }}" class="game-card__rating">⭐ {{ item.rating }}</view>
-          <view wx:if="{{ item.price }}" class="game-card__price">¥{{ item.price }}</view>
-        </view>
-        <view wx:if="{{ item.tags && item.tags.length }}" class="game-card__tags">
-          <text class="tag" wx:for="{{ item.tags }}" wx:for-item="tag" wx:key="*this" wx:for-index="i" wx:if="{{ i < 4 }}">{{ tag }}</text>
+  <view wx:else>
+    <!-- 本地结果 -->
+    <view wx:if="{{ list.length > 0 }}" class="game-list">
+      <view
+        class="game-card"
+        wx:for="{{ list }}"
+        wx:key="_id"
+        data-id="{{ item._id }}"
+        bindtap="handleGameTap"
+        hover-class="game-card--hover"
+      >
+        <image
+          class="game-card__cover"
+          src="{{ item.cover || item.headerImage }}"
+          mode="aspectFill"
+          lazy-load
+        />
+        <view class="game-card__body">
+          <view class="game-card__title">{{ item.name }}</view>
+          <view wx:if="{{ item.description }}" class="game-card__desc">{{ item.description }}</view>
+          <view class="game-card__meta">
+            <view wx:if="{{ item.rating }}" class="game-card__rating">⭐ {{ item.rating }}</view>
+            <view wx:if="{{ item.price }}" class="game-card__price">¥{{ item.price }}</view>
+          </view>
+          <view wx:if="{{ item.tags && item.tags.length }}" class="game-card__tags">
+            <text class="tag" wx:for="{{ item.tags }}" wx:for-item="tag" wx:key="*this" wx:for-index="i" wx:if="{{ i < 4 }}">{{ tag }}</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 加载更多状态 -->
+    <!-- 外部结果分区 -->
+    <view wx:if="{{ external.length > 0 }}" class="external-section">
+      <view class="external-divider">
+        <view class="external-divider__line"></view>
+        <view class="external-divider__text">
+          {{ list.length > 0 ? '更多来自 Steam 的搜索结果' : '为你找到 Steam 上的相关游戏' }}
+        </view>
+        <view class="external-divider__line"></view>
+      </view>
+
+      <view class="game-list">
+        <view
+          class="game-card game-card--external"
+          wx:for="{{ external }}"
+          wx:key="_id"
+          data-item="{{ item }}"
+          bindtap="handleExternalTap"
+          hover-class="game-card--hover"
+        >
+          <image
+            class="game-card__cover"
+            src="{{ item.cover || item.headerImage }}"
+            mode="aspectFill"
+            lazy-load
+          />
+          <view class="game-card__body">
+            <view class="game-card__header">
+              <view class="game-card__title">{{ item.name }}</view>
+              <view class="badge badge--steam">Steam</view>
+            </view>
+            <view wx:if="{{ item.description }}" class="game-card__desc">{{ item.description }}</view>
+            <view class="game-card__meta">
+              <view wx:if="{{ item.price }}" class="game-card__price">≈ ¥{{ item.price }}</view>
+              <view class="game-card__action">
+                <text wx:if="{{ importingId === item._id }}">添加中…</text>
+                <text wx:else>＋ 添加并查看</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="external-tips">
+        点击卡片会自动从 Steam 拉取完整数据并添加到游戏库
+      </view>
+    </view>
+
+    <!-- 加载更多状态（仅对本地有效） -->
     <view wx:if="{{ loading && list.length > 0 }}" class="loading">加载中…</view>
-    <view wx:elif="{{ !hasMore && list.length > 0 }}" class="loading">— 没有更多了 —</view>
+    <view wx:elif="{{ !hasMore && list.length > 0 }}" class="loading">— 本地结果已全部展示 —</view>
   </view>
 </view>

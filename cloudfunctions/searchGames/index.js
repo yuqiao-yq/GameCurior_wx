@@ -1,12 +1,20 @@
 // cloudfunctions/searchGames/index.js
 // 搜索游戏：支持关键词模糊匹配（name / nameEn / tags）+ 热搜词 + 搜索联想
 // 多 action 路由：search / hot / suggest
+// search 支持 includeExternal=true → 同时调 CheapShark 拉取外部结果（含 Steam Store 数据）
 const cloud = require('wx-server-sdk');
+const https = require('https');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const _ = db.command;
 const gamesCol = db.collection('games');
+
+// 美元 → 人民币（简易，与 syncFromCheapShark 保持一致）
+const USD_TO_CNY = 7.2;
+
+// CheapShark 搜索接口超时（5s，外部源不能拖累整体响应）
+const EXTERNAL_TIMEOUT = 5000;
 
 // ============ 常量 ============
 const DEFAULT_HOT_KEYWORDS = [
@@ -52,6 +60,7 @@ async function handleSearch(event) {
     page = 1,
     pageSize = 20,
     sort = 'rating', // rating / new / hot
+    includeExternal = false, // 是否同时拉外部数据源（CheapShark）
   } = event;
 
   const kw = String(keyword || '').trim();
@@ -59,7 +68,7 @@ async function handleSearch(event) {
     return {
       code: 1001,
       message: '关键词不能为空',
-      data: { list: [], page, pageSize, hasMore: false, keyword: '' },
+      data: { list: [], page, pageSize, hasMore: false, keyword: '', external: [] },
     };
   }
 
@@ -82,7 +91,8 @@ async function handleSearch(event) {
     ])
   );
 
-  const { data } = await query
+  // 并发：本地查询 + 外部搜索（外部仅在 page=1 时触发）
+  const localPromise = query
     .orderBy(sortConfig.field, sortConfig.order)
     .skip((page - 1) * pageSize)
     .limit(pageSize)
@@ -97,20 +107,111 @@ async function handleSearch(event) {
       tags: true,
       description: true,
       categoryId: true,
+      externalIds: true,
     })
     .get();
+
+  const externalPromise = (includeExternal && page === 1)
+    ? searchExternalCheapShark(kw).catch((e) => {
+        console.warn('[searchGames:external] failed:', e.message);
+        return [];
+      })
+    : Promise.resolve([]);
+
+  const [localRes, externalRaw] = await Promise.all([localPromise, externalPromise]);
+  const localData = localRes.data || [];
+
+  // 过滤外部结果：去掉已经在本地存在的（按 steamAppID 比对）
+  const localSteamIds = new Set(
+    localData
+      .map((g) => g.externalIds && g.externalIds.steam)
+      .filter(Boolean)
+      .map(String)
+  );
+  const externalList = externalRaw.filter(
+    (item) => !item._steamAppId || !localSteamIds.has(String(item._steamAppId))
+  );
 
   return {
     code: 0,
     message: 'ok',
     data: {
-      list: data || [],
+      list: localData,
+      external: externalList,
       page,
       pageSize,
-      hasMore: (data || []).length === pageSize,
+      hasMore: localData.length === pageSize,
       keyword: kw,
     },
   };
+}
+
+// ============ 外部源：CheapShark 搜索 ============
+// 文档：https://apidocs.cheapshark.com/#tag/Games/operation/getGames
+// 返回格式：[{ gameID, steamAppID, cheapest, cheapestDealID, external, thumb }]
+async function searchExternalCheapShark(keyword) {
+  const url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(keyword)}&limit=20`;
+  const list = await httpGet(url, EXTERNAL_TIMEOUT);
+  if (!Array.isArray(list)) return [];
+
+  return list.map((raw) => {
+    const steamId = raw.steamAppID ? String(raw.steamAppID) : null;
+    const usd = parseFloat(raw.cheapest);
+    return {
+      // 用前缀避免与本地 _id 冲突；前端据此识别外部条目
+      _id: `ext_cs_${raw.gameID}`,
+      _external: true,
+      _source: 'cheapshark',
+      _externalId: String(raw.gameID),
+      _steamAppId: steamId,
+      name: raw.external || '',
+      nameEn: raw.external || '',
+      // 优先用 Steam CDN 图（清晰度好），fallback 到 CheapShark 缩略图
+      cover: steamId
+        ? `https://cdn.akamai.steamstatic.com/steam/apps/${steamId}/library_600x900.jpg`
+        : (raw.thumb || ''),
+      headerImage: steamId
+        ? `https://cdn.akamai.steamstatic.com/steam/apps/${steamId}/header.jpg`
+        : (raw.thumb || ''),
+      price: Number.isFinite(usd) ? Math.round(usd * USD_TO_CNY * 100) / 100 : null,
+      tags: ['Steam'],
+      description: '来自 Steam 商店的搜索结果，点击添加到库后查看详细信息',
+    };
+  });
+}
+
+// ============ HTTP GET（与 sync 系列函数保持一致的请求头与超时机制） ============
+function httpGet(url, timeout = 10000) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      timeout,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    };
+    const req = https.get(url, options, (res) => {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      let buf = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => (buf += chunk));
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(buf));
+        } catch (e) {
+          reject(new Error('Invalid JSON: ' + e.message));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('request timeout'));
+    });
+  });
 }
 
 // ============ hot：热搜词 ============

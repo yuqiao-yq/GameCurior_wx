@@ -12,7 +12,8 @@
 | [`userProfile/`](./userProfile) | 用户资料 get/update（昵称变更走内容安全审核） | 小程序前端调用 |
 | [`getGameList/`](./getGameList) | 首页游戏列表（含 mock 兜底，支持 rating/new/hot/discount/sales 排序） | 小程序前端调用 |
 | [`getGameDetail/`](./getGameDetail) | 游戏详情 + 浏览历史上报 + 相关推荐 | 小程序前端调用 |
-| [`searchGames/`](./searchGames) | 搜索游戏（search/hot/suggest 三 action） | 小程序前端调用 |
+| [`searchGames/`](./searchGames) | 搜索游戏（search/hot/suggest，含 includeExternal=true 调 CheapShark） | 小程序前端调用 |
+| [`importGame/`](./importGame) | 把外部数据源（CheapShark+Steam Store）的游戏导入本地 games 集合 | 小程序前端调用 |
 | [`favorite/`](./favorite) | 收藏 CRUD（add/remove/list/toggle/updateStatus） | 小程序前端调用 |
 | [`history/`](./history) | 浏览历史 list/clear/remove（report 在 getGameDetail 内完成） | 小程序前端调用 |
 | [`contentCheck/`](./contentCheck) | 内容安全审核（封装 msgSecCheck V2 + imgSecCheck，需 openapi 权限） | 云函数互调 / 前端 |
@@ -45,6 +46,7 @@ cd cloudfunctions/userProfile && npm install
 cd cloudfunctions/getGameList && npm install
 cd cloudfunctions/getGameDetail && npm install
 cd cloudfunctions/searchGames && npm install
+cd cloudfunctions/importGame && npm install
 cd cloudfunctions/favorite && npm install
 cd cloudfunctions/history && npm install
 cd cloudfunctions/contentCheck && npm install
