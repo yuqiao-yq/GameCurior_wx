@@ -65,14 +65,14 @@ Page({
     wx.navigateTo({ url: '/pages/mine/favorites/favorites' });
   },
 
-  // 跳浏览历史（待开发）
+  // 跳浏览历史
   handleGotoHistory() {
-    wx.showToast({ title: '浏览历史功能开发中', icon: 'none' });
+    wx.navigateTo({ url: '/pages/mine/history/history' });
   },
 
-  // 设置（待开发）
+  // 设置
   handleGotoSetting() {
-    wx.showToast({ title: '设置功能开发中', icon: 'none' });
+    wx.navigateTo({ url: '/pages/mine/setting/setting' });
   },
 
   // 关于我们

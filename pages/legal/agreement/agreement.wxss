@@ -1,0 +1,50 @@
+/* 通用法律页样式：用户协议 / 隐私政策共用相同视觉 */
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 48rpx 40rpx 80rpx;
+}
+
+.header {
+  padding-bottom: 32rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+  margin-bottom: 32rpx;
+}
+
+.header__title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1f2329;
+  margin-bottom: 12rpx;
+}
+
+.header__meta {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 16rpx;
+}
+
+.section__paragraph {
+  font-size: 28rpx;
+  color: #4e5969;
+  line-height: 1.7;
+  margin-bottom: 12rpx;
+  text-align: justify;
+}
+
+.footer {
+  margin-top: 64rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a9aeb8;
+}

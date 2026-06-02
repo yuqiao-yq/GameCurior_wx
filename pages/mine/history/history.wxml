@@ -1,0 +1,63 @@
+<!--pages/mine/history/history.wxml-->
+<view class="page">
+  <!-- 顶部统计 + 清空 -->
+  <view wx:if="{{ list.length > 0 }}" class="header">
+    <view class="header__count">共 {{ list.length }} 条记录</view>
+    <view class="header__clear" bindtap="handleClear" hover-class="header__clear--hover">
+      🗑️ 清空
+    </view>
+  </view>
+
+  <!-- 加载中（首次） -->
+  <view wx:if="{{ !inited && loading }}" class="loading">加载中…</view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{ inited && list.length === 0 }}" class="empty">
+    <view class="empty__icon">📜</view>
+    <view class="empty__title">还没有浏览记录</view>
+    <view class="empty__desc">去首页发现你感兴趣的游戏吧</view>
+  </view>
+
+  <!-- 分组列表 -->
+  <view wx:else class="groups">
+    <view class="group" wx:for="{{ groups }}" wx:key="label" wx:for-item="group">
+      <view class="group__label">{{ group.label }}</view>
+
+      <view
+        class="item"
+        wx:for="{{ group.items }}"
+        wx:key="_id"
+        wx:for-item="item"
+        data-id="{{ item._id }}"
+        data-game-id="{{ item.gameId }}"
+        bindtap="handleItemTap"
+        hover-class="item--hover"
+      >
+        <image
+          class="item__cover"
+          src="{{ item.game.cover || item.game.headerImage }}"
+          mode="aspectFill"
+          lazy-load
+        />
+        <view class="item__body">
+          <view class="item__title">{{ item.game.name }}</view>
+          <view wx:if="{{ item.game.description }}" class="item__desc">{{ item.game.description }}</view>
+          <view class="item__meta">
+            <view wx:if="{{ item.game.rating }}" class="item__rating">⭐ {{ item.game.rating }}</view>
+            <view wx:if="{{ item.game.price }}" class="item__price">¥{{ item.game.price }}</view>
+          </view>
+        </view>
+        <view
+          class="item__remove"
+          data-id="{{ item._id }}"
+          catchtap="handleRemove"
+          hover-class="item__remove--hover"
+        >×</view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{ loading && list.length > 0 }}" class="loading">加载中…</view>
+    <view wx:elif="{{ !hasMore && list.length > 0 }}" class="loading">— 没有更多了 —</view>
+  </view>
+</view>

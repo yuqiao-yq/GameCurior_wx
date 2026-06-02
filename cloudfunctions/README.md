@@ -9,10 +9,11 @@
 | 函数 | 用途 | 触发方式 |
 |---|---|---|
 | [`login/`](./login) | 微信登录，自动建档 | 小程序前端调用 |
-| [`getGameList/`](./getGameList) | 首页游戏列表（含 mock 兜底） | 小程序前端调用 |
+| [`getGameList/`](./getGameList) | 首页游戏列表（含 mock 兜底，支持 rating/new/hot/discount/sales 排序） | 小程序前端调用 |
 | [`getGameDetail/`](./getGameDetail) | 游戏详情 + 浏览历史上报 + 相关推荐 | 小程序前端调用 |
 | [`searchGames/`](./searchGames) | 搜索游戏（search/hot/suggest 三 action） | 小程序前端调用 |
 | [`favorite/`](./favorite) | 收藏 CRUD（add/remove/list/toggle/updateStatus） | 小程序前端调用 |
+| [`history/`](./history) | 浏览历史 list/clear/remove（report 在 getGameDetail 内完成） | 小程序前端调用 |
 
 ### 数据同步函数（管理端）
 
@@ -42,6 +43,7 @@ cd cloudfunctions/getGameList && npm install
 cd cloudfunctions/getGameDetail && npm install
 cd cloudfunctions/searchGames && npm install
 cd cloudfunctions/favorite && npm install
+cd cloudfunctions/history && npm install
 cd cloudfunctions/initGames && npm install
 cd cloudfunctions/syncFromSteamSpy && npm install
 cd cloudfunctions/syncFromCheapShark && npm install

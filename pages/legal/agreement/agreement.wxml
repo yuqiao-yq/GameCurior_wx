@@ -1,0 +1,19 @@
+<!--pages/legal/agreement/agreement.wxml-->
+<view class="page">
+  <view class="header">
+    <view class="header__title">{{ title }}</view>
+    <view class="header__meta">最后更新：{{ updatedAt }}</view>
+  </view>
+
+  <view class="section" wx:for="{{ sections }}" wx:key="title" wx:for-item="section">
+    <view class="section__title">{{ section.title }}</view>
+    <view
+      class="section__paragraph"
+      wx:for="{{ section.paragraphs }}"
+      wx:key="*this"
+      wx:for-item="p"
+    >{{ p }}</view>
+  </view>
+
+  <view class="footer">— {{ appName }} ·{{ '  ' }}{{ updatedAt }} —</view>
+</view>

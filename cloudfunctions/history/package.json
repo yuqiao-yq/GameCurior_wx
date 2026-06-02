@@ -1,0 +1,9 @@
+{
+  "name": "history",
+  "version": "1.0.0",
+  "description": "浏览历史：list / clear / remove（上报已在 getGameDetail 内完成）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

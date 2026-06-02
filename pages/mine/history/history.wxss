@@ -1,0 +1,174 @@
+/* pages/mine/history/history.wxss */
+.page {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding-bottom: 40rpx;
+}
+
+/* 头部 */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f2f3f5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header__count {
+  flex: 1;
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+.header__clear {
+  font-size: 26rpx;
+  color: #f53f3f;
+  padding: 8rpx 16rpx;
+}
+
+.header__clear--hover {
+  opacity: 0.6;
+}
+
+/* 状态 */
+.loading {
+  padding: 40rpx 0;
+  text-align: center;
+  color: #86909c;
+  font-size: 26rpx;
+}
+
+.empty {
+  padding: 160rpx 60rpx;
+  text-align: center;
+}
+
+.empty__icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.5;
+}
+
+.empty__title {
+  font-size: 30rpx;
+  color: #1f2329;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.empty__desc {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+/* ============ 分组 ============ */
+.groups {
+  padding: 24rpx 32rpx;
+}
+
+.group {
+  margin-bottom: 32rpx;
+}
+
+.group__label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #4e5969;
+  margin-bottom: 16rpx;
+  padding-left: 4rpx;
+}
+
+/* ============ 历史项 ============ */
+.item {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 16rpx;
+  padding: 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.item--hover {
+  transform: scale(0.98);
+}
+
+.item__cover {
+  width: 140rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  background: #f2f3f5;
+  flex-shrink: 0;
+}
+
+.item__body {
+  flex: 1;
+  margin-left: 20rpx;
+  margin-right: 60rpx;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item__desc {
+  flex: 1;
+  font-size: 22rpx;
+  color: #86909c;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.item__meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+
+.item__rating {
+  font-size: 24rpx;
+  color: #ff9a23;
+  font-weight: 600;
+}
+
+.item__price {
+  font-size: 26rpx;
+  color: #f53f3f;
+  font-weight: 600;
+}
+
+/* 右上角删除按钮 */
+.item__remove {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #c9cdd4;
+  border-radius: 50%;
+}
+
+.item__remove--hover {
+  background: #f2f3f5;
+  color: #f53f3f;
+}
