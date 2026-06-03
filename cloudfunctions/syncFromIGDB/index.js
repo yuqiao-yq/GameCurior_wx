@@ -298,31 +298,78 @@ async function upsertGame(data) {
 }
 
 // ============ 主入口 ============
-// event 参数：
-//   - platforms: number[] 多个 IGDB 平台 ID（默认 5 大主机：Switch/PS5/PS4/XboxS/Xbox1）
-//   - limitPerPlatform: 每个平台拉取数量（默认 30）
+// 调用方式（两种 mode）：
+//
+// 【mode='batch'】（推荐，云函数环境实际可用的唯一模式）
+//   由本地脚本 scripts/sync-igdb-local.js 拉好 IGDB 原始数据后传进来
+//   云函数只负责 normalize + upsert
+//   event: { mode: 'batch', games: [<IGDB raw 对象>, ...] }
+//
+// 【mode='fetch'】（保留作存档，云函数出口不通时会 timeout）
+//   云函数自己调 IGDB API（需要 TWITCH_CLIENT_ID/SECRET 环境变量）
+//   event: { mode: 'fetch', platforms?: [130,167,...], limitPerPlatform?: 30 }
+//   注意：腾讯云函数出口到 id.twitch.tv / api.igdb.com 不可达，此 mode 不可用
+//
+// 为什么有 batch 模式：见 cloudfunctions/README.md §6 (IGDB 同步走本地脚本)
 exports.main = async (event, context) => {
+  const mode = event.mode || 'batch';
+
+  if (mode === 'batch') {
+    return await runBatch(event);
+  }
+  if (mode === 'fetch') {
+    return await runFetch(event);
+  }
+  return { code: 1002, message: `unknown mode: ${mode}`, data: null };
+};
+
+// ============ batch 模式：本地传入 IGDB raw 数据，云函数 normalize + upsert ============
+async function runBatch(event) {
+  const games = Array.isArray(event.games) ? event.games : [];
+  if (games.length === 0) {
+    return { code: 1001, message: 'mode=batch 需要 event.games 数组', data: null };
+  }
+
+  console.log(`[IGDB:batch] received ${games.length} games, upserting...`);
+  const stats = { total: games.length, inserted: 0, updated: 0, failed: 0, failures: [] };
+
+  for (const raw of games) {
+    try {
+      const normalized = normalize(raw);
+      const result = await upsertGame(normalized);
+      stats[result]++;
+    } catch (e) {
+      stats.failed++;
+      stats.failures.push({ name: raw && raw.name, error: e.message });
+    }
+  }
+
+  console.log(`[IGDB:batch] done: +${stats.inserted} ·${stats.updated} x${stats.failed}`);
+  return { code: 0, message: 'ok', data: { source: 'igdb', mode: 'batch', ...stats } };
+}
+
+// ============ fetch 模式（云函数自调 IGDB，当前出口不通存档保留） ============
+async function runFetch(event) {
   if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
     return {
       code: 1001,
-      message: '未配置 TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET 环境变量，请到 https://dev.twitch.tv/console/apps 申请后在云开发控制台配置',
+      message: '未配置 TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET 环境变量',
       data: null,
     };
   }
 
   const platforms = Array.isArray(event.platforms) && event.platforms.length > 0
     ? event.platforms
-    : [130, 167, 48, 169, 49]; // Switch / PS5 / PS4 / XboxS / Xbox1
+    : [130, 167, 48, 169, 49];
   const limitPerPlatform = event.limitPerPlatform || 30;
 
   try {
     const accessToken = await getAccessToken();
-    console.log('[IGDB] token ready, scanning platforms:', platforms.join(','));
+    console.log('[IGDB:fetch] token ready, platforms:', platforms.join(','));
 
     const stats = {
       total: 0, inserted: 0, updated: 0, failed: 0,
-      perPlatform: {},
-      failures: [],
+      perPlatform: {}, failures: [],
     };
 
     for (const platformId of platforms) {
@@ -331,31 +378,26 @@ exports.main = async (event, context) => {
         const list = await fetchByPlatform(platformId, accessToken, limitPerPlatform);
         p.total = (list || []).length;
         stats.total += p.total;
-
         for (const item of list || []) {
           try {
-            const normalized = normalize(item);
-            const result = await upsertGame(normalized);
+            const result = await upsertGame(normalize(item));
             p[result]++;
             stats[result]++;
           } catch (e) {
-            p.failed++;
-            stats.failed++;
+            p.failed++; stats.failed++;
             stats.failures.push({ platformId, name: item.name, error: e.message });
           }
         }
       } catch (e) {
-        console.warn(`[IGDB] platform=${platformId} fetch fail:`, e.message);
+        console.warn(`[IGDB:fetch] platform=${platformId} fetch fail:`, e.message);
         stats.failures.push({ platformId, error: e.message });
       }
       stats.perPlatform[platformId] = p;
-      // IGDB 限速 4 req/s，平台间留 300ms 间隔
       await new Promise((r) => setTimeout(r, 300));
     }
-
-    return { code: 0, message: 'ok', data: { source: 'igdb', ...stats } };
+    return { code: 0, message: 'ok', data: { source: 'igdb', mode: 'fetch', ...stats } };
   } catch (err) {
-    console.error('[IGDB] fatal:', err);
+    console.error('[IGDB:fetch] fatal:', err);
     return { code: 5000, message: err.message, data: null };
   }
-};
+}

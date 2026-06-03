@@ -30,7 +30,7 @@
 | [`syncFromSteamSpy/`](./syncFromSteamSpy) | [SteamSpy](https://steamspy.com/api.php) | ❌ | 拉取 Steam 热门游戏（销量、评分） |
 | [`syncFromCheapShark/`](./syncFromCheapShark) | [CheapShark](https://apidocs.cheapshark.com) | ❌ | 实时打折信息 |
 | [`syncFromRAWG/`](./syncFromRAWG) | [RAWG.io](https://rawg.io/apidocs) | ✅ 免费 | ⚠️ 出口不通暂禁用。截图、视频、标签、详细元数据 |
-| [`syncFromIGDB/`](./syncFromIGDB) | [IGDB (Twitch)](https://api-docs.igdb.com/) | ✅ 免费 | ⚠️ 云函数环境出口不通，**实际同步走 GitHub Actions**（见 §6） |
+| [`syncFromIGDB/`](./syncFromIGDB) | [IGDB (Twitch)](https://api-docs.igdb.com/) | ✅ 免费 | mode=batch 入参 IGDB 数据，云函数只 upsert；由本地脚本 [`scripts/sync-igdb-local.js`](../scripts/sync-igdb-local.js) 配合（见 §6） |
 | [`syncAllSources/`](./syncAllSources) | 全部 | - | **一键聚合调度**（含 5 个主机平台 + IGDB 兜底） |
 
 ---
@@ -106,7 +106,7 @@ cd cloudfunctions/initGames && npm install
 cd cloudfunctions/syncFromSteamSpy && npm install
 cd cloudfunctions/syncFromCheapShark && npm install
 cd cloudfunctions/syncFromRAWG && npm install
-cd cloudfunctions/syncFromIGDB && npm install  # ⚠️ 云函数环境出口不通，仅作存档；实际同步走 GitHub Actions（见 §6）
+cd cloudfunctions/syncFromIGDB && npm install  # batch 模式由本地脚本喂数据（见 §6）
 cd cloudfunctions/syncFromSteamStore && npm install
 cd cloudfunctions/syncAllSources && npm install
 ```
@@ -150,59 +150,68 @@ cd cloudfunctions/syncAllSources && npm install
 1. 注册 https://rawg.io/apidocs 获取免费 API Key（每月 20,000 次调用配额）
 2. 云开发控制台 → 云函数 → `syncFromRAWG` → 配置 → **环境变量** → 新增 `RAWG_API_KEY=你的key`
 
-### 6. （可选）配置 IGDB 同步（通过 GitHub Actions）
+### 6. （可选）配置 IGDB 主机平台同步（本地半自动）
 
-> ⚠️ **重要架构说明**：腾讯云函数出口访问 `id.twitch.tv` / `api.igdb.com` (AWS 段) 不可达，
-> 同理 RAWG 走 Cloudflare 节点 (`108.160.170.26`) 也国内不通。
-> **IGDB 同步通过 GitHub Actions runner 执行**（海外出口稳定），脚本走 `@cloudbase/node-sdk` 直接写云数据库。
-> 云函数 `syncFromIGDB` 代码保留但不可用，等海外代理通道接入后再启用。
+> ⚠️ **重要架构说明**
+> - **腾讯云函数出口** 到 `id.twitch.tv` / `api.igdb.com` (AWS) 不可达（curl 20s timeout 验证）
+> - **GitHub Actions** 调云数据库需要：腾讯云 CAM 关联（个人小程序卡死）/ 或 AppSecret IP 白名单（runner 动态 IP 卡死）
+> - 唯一可行方案：**本地脚本拉 IGDB（你电脑出口能通）→ 输出 JSON → cloudbase CLI invoke 云函数 syncFromIGDB**（mode='batch'，云函数只 upsert 不拉数据）
 >
-> 脚本路径：[`scripts/sync-igdb-ci.js`](../scripts/sync-igdb-ci.js)
-> Workflow：[`.github/workflows/sync-igdb.yml`](../.github/workflows/sync-igdb.yml)
+> 同步频率：主机游戏库变化慢，手动每月跑 1-2 次即可。
+>
+> 相关文件：
+> - [`scripts/sync-igdb-local.js`](../scripts/sync-igdb-local.js) 本地拉数据脚本
+> - [`cloudfunctions/syncFromIGDB/`](./syncFromIGDB) 云函数，含 `mode:'batch'` 入口
 
-IGDB 是 Twitch 旗下的游戏数据库，覆盖最全（含主机独占 + 日韩游戏），元数据最权威。配置 4 步：
+IGDB 是 Twitch 旗下游戏数据库，覆盖最全（含主机独占 + 日韩游戏），元数据最权威。
 
 #### 6.1 申请 Twitch app credentials
 1. 打开 https://dev.twitch.tv/console/apps → **Register Your Application**
    - Name: 任意（如 `GameCurior IGDB`）
-   - OAuth Redirect URLs: `http://localhost`（IGDB 用 client_credentials 流，不实际跳转）
+   - OAuth Redirect URLs: `http://localhost`
    - Category: `Application Integration`
-2. 创建后拿到 `Client ID`，点 **New Secret** 拿到 `Client Secret`（只显示一次，立即复制）
+2. 创建后拿到 `Client ID`，点 **New Secret** 拿到 `Client Secret`（只显示一次）
 
-#### 6.2 把云开发账号关联到腾讯云，拿 CAM 密钥
-1. 微信开发者工具 → 云开发 → 费用管理 → 充值与账单 → 登录腾讯云完成账号关联
-   （这一步是为了在腾讯云 CAM 拿到能写微信云数据库的 secretId/secretKey）
-2. 打开 https://console.cloud.tencent.com/cam/capi → 新建密钥，记下 `SecretId` + `SecretKey`
-3. 在腾讯云控制台 https://console.cloud.tencent.com/tcb/env/index 确认 envId（应与 `utils/env.js` 里的 `CLOUD_ENV_ID` 一致）
+#### 6.2 安装并登录 cloudbase CLI（一次性）
+```bash
+npm install -g @cloudbase/cli
+cloudbase login          # 弹出二维码，用小程序管理员微信扫码
+```
+登录态缓存在 `~/.cloudbase` 目录，无需 CAM 密钥。
 
-#### 6.3 配置 GitHub Repository Secrets
-仓库 → Settings → Secrets and variables → Actions → New repository secret，添加 5 条：
+#### 6.3 部署 syncFromIGDB 云函数
+在微信开发者工具云函数面板右键 `syncFromIGDB` → 上传并部署：云端安装依赖。
+**不需要**配置环境变量（batch 模式不调 Twitch，不需要 TWITCH_*）。
 
-| Secret Name | 来源 |
-|---|---|
-| `TWITCH_CLIENT_ID` | 6.1 拿的 Client ID |
-| `TWITCH_CLIENT_SECRET` | 6.1 拿的 Client Secret |
-| `CLOUDBASE_SECRET_ID` | 6.2 拿的腾讯云 SecretId |
-| `CLOUDBASE_SECRET_KEY` | 6.2 拿的腾讯云 SecretKey |
-| `CLOUD_ENV_ID` | 你的云开发环境 ID |
+#### 6.4 创建 `kvCache` 集合（可选，目前不再使用）
+batch 模式的 token 缓存在本地 `scripts/.igdb-token.json`，云端不再需要 `kvCache`。
+但为防止以后切回 fetch 模式麻烦，集合可以建着不用。
 
-#### 6.4 触发同步
-- **自动**：每天 UTC 19:07（北京 03:07）跑一次
-- **手动**：GitHub 仓库 → Actions → "Sync IGDB → CloudBase" → Run workflow，可指定 `platforms` 和 `limit` 参数
-
-#### 6.5 本地调试（可选）
+#### 6.5 触发一次同步（按需手动）
 ```bash
 cd scripts
-npm install
 export TWITCH_CLIENT_ID=...
 export TWITCH_CLIENT_SECRET=...
-export CLOUDBASE_SECRET_ID=...
-export CLOUDBASE_SECRET_KEY=...
-export CLOUD_ENV_ID=...
-node sync-igdb-ci.js --platforms=130 --limit=3   # 冒烟 Switch 3 款
+
+# 1. 本地拉 IGDB 数据，产出 .igdb-batch.json
+node sync-igdb-local.js --platforms=130 --limit=3    # 冒烟 Switch 3 款
+
+# 2. cloudbase CLI 喂给云函数
+cloudbase functions:invoke syncFromIGDB \
+  --params "$(cat .igdb-batch.json)" \
+  -e cloud1-8g8jrsgc94538121
+
+# 预期返回：{ source: 'igdb', mode: 'batch', total: 3, inserted: 3, updated: 0, failed: 0 }
 ```
 
-Token 缓存在 `kvCache` 集合（`_id='igdb_token'`），~60 天有效，自动续期。
+冒烟通过后跑全量：
+```bash
+node sync-igdb-local.js   # 默认 5 大主机 × 30 款 = 最多 150 条
+cloudbase functions:invoke syncFromIGDB \
+  --params "$(cat .igdb-batch.json)" -e cloud1-8g8jrsgc94538121
+```
+
+Token 缓存在 `scripts/.igdb-token.json`（`.gitignore` 已排除）。
 
 ---
 
@@ -288,13 +297,13 @@ flowchart LR
 | 云函数报「DATABASE_PERMISSION_DENIED」 | 在云开发控制台为对应集合开放写权限 |
 | SteamSpy/CheapShark 超时 | 国内云函数访问境外有时不稳，重试即可 |
 | RAWG 报「未配置 RAWG_API_KEY」 | 见第 5 步配置环境变量 |
-| 云函数 `syncFromIGDB` 报 `request timeout` | 云函数不可用（出口到 AWS 不通）。IGDB 同步走 GitHub Actions，见第 6 步 |
-| IGDB GitHub Actions 报 401 Unauthorized | token 缓存可能过期或失效，到云数据库 `kvCache` 集合手动删除 `igdb_token` 文档后重跑会自动重新申请 |
+| 云函数 `syncFromIGDB` mode=fetch 报 `request timeout` | 云函数出口到 AWS 不通。改用 mode=batch（默认）+ 本地 sync 脚本，见 §6 |
+| 本地 sync-igdb-local.js 报 IGDB 401 | 删除 `scripts/.igdb-token.json` 后重跑会自动重新申请 |
+| `cloudbase functions:invoke` 提示未登录 | `cloudbase login` 重新扫码 |
+| `cloudbase functions:invoke` 提示找不到云函数 | 先把 `syncFromIGDB` 部署到云端，或 `-e <环境ID>` 指定环境 |
 | 中文名被覆盖了 | 检查游戏的 `dataSources` 是否包含 `seed` |
-| 主机游戏（Switch/PS5）库里没有 | GitHub Actions 触发 "Sync IGDB → CloudBase" workflow；首次手动跑一次 |
-| RAWG 调用 `request timeout` / `Destination Host Unreachable` | RAWG 走 Cloudflare 节点（如 `108.160.170.26`）国内不可达，本地 + 腾讯云函数出口同样断；已在 `syncAllSources` 注释禁用，留待后续海外代理通道接入 |
-| GitHub Actions 报 `missing secretId or secretKey of tencent cloud` | Repository Secrets 没配齐，见 6.3 |
-| GitHub Actions 报 `permission denied` | CAM 子账号没有云开发权限。控制台 → CAM → 用户 → 关联策略，添加 `QcloudTCBFullAccess` |
+| 主机游戏（Switch/PS5）库里没有 | 按 §6 跑本地 IGDB sync 一次 |
+| RAWG 调用 `request timeout` / `Destination Host Unreachable` | RAWG 走 Cloudflare 节点（如 `108.160.170.26`）国内不可达；已在 `syncAllSources` 注释禁用 |
 
 ---
 

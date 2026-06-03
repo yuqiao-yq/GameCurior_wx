@@ -2,12 +2,9 @@
   "name": "gamecurior-scripts",
   "version": "1.0.0",
   "private": true,
-  "description": "外部同步脚本（GitHub Actions / 本地跑），用于绕过云函数出口不可达问题",
-  "main": "sync-igdb-ci.js",
+  "description": "本地维护脚本（IGDB 拉数据后用 cloudbase CLI invoke 喂给云函数）",
+  "main": "sync-igdb-local.js",
   "scripts": {
-    "sync:igdb": "node sync-igdb-ci.js"
-  },
-  "dependencies": {
-    "@cloudbase/node-sdk": "^3.13.0"
+    "sync:igdb": "node sync-igdb-local.js"
   }
 }

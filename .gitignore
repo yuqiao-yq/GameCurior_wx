@@ -21,3 +21,8 @@ npm-debug.log*
 
 # 本地环境配置（含云开发 env ID 等）
 utils/env.js
+
+# IGDB 同步脚本本地缓存（token + 批量 JSON）
+scripts/.igdb-token.json
+scripts/.igdb-batch.json
+scripts/node_modules/
