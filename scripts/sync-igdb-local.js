@@ -48,9 +48,11 @@ const argv = process.argv.slice(2).reduce((acc, s) => {
   return acc;
 }, {});
 
-const PLATFORMS = (argv.platforms || '130,167,48,169,49')
+// 默认覆盖 6 大平台：Switch / PS5 / PS4 / Xbox Series / Xbox One / PC
+const PLATFORMS = (argv.platforms || '130,167,48,169,49,6')
   .split(',').map((s) => Number(s.trim())).filter(Boolean);
-const LIMIT_PER_PLATFORM = Number(argv.limit) || 30;
+const LIMIT_PER_PLATFORM = Number(argv.limit) || 100;
+const BATCH_SIZE = Number(argv.batchSize) || 50;   // 云函数单次 upsert 上限（防 60s 超时）
 const OUT_PATH = argv.out || path.join(__dirname, '.igdb-batch.json');
 const TOKEN_CACHE_PATH = process.env.IGDB_TOKEN_CACHE_FILE
   || path.join(__dirname, '.igdb-token.json');
@@ -172,17 +174,53 @@ async function main() {
     process.exit(1);
   }
 
-  // 写出 JSON（格式直接对应云函数 event 参数）
-  const payload = { mode: 'batch', games: allGames };
-  fs.writeFileSync(OUT_PATH, JSON.stringify(payload));
+  // 应用中文名映射（如有）
+  let nameMap = {};
+  try {
+    nameMap = require('./igdb-name-map.js');
+  } catch (e) {
+    // 表不存在不报错
+  }
+  let mapHits = 0;
+  if (Object.keys(nameMap).length > 0) {
+    for (const g of allGames) {
+      if (g.name && nameMap[g.name]) {
+        g._zhName = nameMap[g.name];
+        mapHits++;
+      }
+    }
+    console.log(`[name-map] 中文名命中 ${mapHits}/${allGames.length}`);
+  }
 
-  console.log(`\n✅ 共 ${allGames.length} 条游戏数据，已写入 ${OUT_PATH}`);
-  console.log(`\n🚀 下一步：调云函数入库\n`);
-  console.log(`   tcb fn invoke syncFromIGDB \\`);
-  console.log(`     --params "$(cat ${path.relative(process.cwd(), OUT_PATH)})" \\`);
-  console.log(`     -e <你的环境 ID>`);
-  console.log(`\n   💡 推荐用一键脚本完成上述两步：./scripts/sync-igdb.sh`);
-  console.log(`\n   首次使用需先：npm install -g @cloudbase/cli && cloudbase login`);
+  // 分批输出 JSON（每批最多 BATCH_SIZE 条，云函数单次 upsert 不撞 60s 超时）
+  const batches = [];
+  for (let i = 0; i < allGames.length; i += BATCH_SIZE) {
+    batches.push(allGames.slice(i, i + BATCH_SIZE));
+  }
+
+  // 第一批写到原 OUT_PATH（兼容老脚本）；多批则同时输出 .igdb-batch.N.json
+  const written = [];
+  if (batches.length === 1) {
+    fs.writeFileSync(OUT_PATH, JSON.stringify({ mode: 'batch', games: batches[0] }));
+    written.push(OUT_PATH);
+  } else {
+    for (let i = 0; i < batches.length; i++) {
+      const p = OUT_PATH.replace(/\.json$/, `.${i + 1}.json`);
+      fs.writeFileSync(p, JSON.stringify({ mode: 'batch', games: batches[i] }));
+      written.push(p);
+    }
+    // 老路径写第一批做兼容（旧 sync-igdb.sh 直接读这个）
+    fs.writeFileSync(OUT_PATH, JSON.stringify({ mode: 'batch', games: batches[0] }));
+  }
+
+  console.log(`\n✅ 共 ${allGames.length} 条游戏数据，分 ${batches.length} 批写出：`);
+  written.forEach((p) => console.log(`   - ${path.relative(process.cwd(), p)}`));
+  console.log(`\n🚀 下一步：调云函数入库（推荐 ./scripts/sync-igdb.sh 一键脚本）`);
+  console.log(`\n   手动版（每批轮一次）：`);
+  written.forEach((p) => {
+    const rel = path.relative(process.cwd(), p);
+    console.log(`   tcb fn invoke syncFromIGDB --params "$(cat ${rel})" -e <env>`);
+  });
 }
 
 main().catch((err) => {

@@ -211,13 +211,22 @@ function normalize(raw) {
   // 封面：t_cover_big (227x320)
   const cover = raw.cover && raw.cover.url ? igdbImage(raw.cover.url, 'cover_big') : '';
 
+  // 中文名：本地脚本查 igdb-name-map.js 命中则塞到 raw._zhName 字段
+  // name 优先用中文，fallback 英文；nameEn 始终是原英文
+  const nameEn = raw.name || '';
+  const name = raw._zhName || nameEn;
+
+  // keywords：搜索用的扩展词（中英名都进，便于"塞尔达"和"Zelda"都能搜到）
+  const keywords = Array.from(new Set([name, nameEn].filter(Boolean)));
+
   return {
     externalIds: {
       igdb: String(raw.id),
       ...(steamId ? { steam: steamId } : {}),
     },
-    name: raw.name || '',
-    nameEn: raw.name || '',
+    name,
+    nameEn,
+    keywords,
     description: raw.summary ? String(raw.summary).slice(0, 800) : '',
     cover,
     headerImage: cover,
@@ -270,9 +279,25 @@ async function upsertGame(data) {
   const hasSeed = (old.dataSources || []).includes('seed');
 
   // 合并：保留中文名 / 中文描述；截图视频画质优先 IGDB；价格不动
+  // 名称合并规则：
+  //   - 已有 seed → 完全保留 seed 中文名
+  //   - 已有非 seed 名（如 SteamStore 写过中文名） → 也保留旧的
+  //   - data.name 命中映射表（中文）→ 用 data.name（这是新中文化），覆盖旧英文
+  //   - 都没有 → 用 IGDB 英文名
+  const dataIsChinese = data.name && data.name !== data.nameEn; // 命中映射表的标志
+  let mergedName;
+  if (hasSeed) {
+    mergedName = old.name;
+  } else if (dataIsChinese) {
+    mergedName = data.name; // 中文化优先覆盖旧英文
+  } else {
+    mergedName = old.name || data.name;
+  }
+
   const merged = {
-    name: hasSeed ? old.name : (old.name || data.name),
+    name: mergedName,
     nameEn: data.nameEn || old.nameEn,
+    keywords: Array.from(new Set([...(old.keywords || []), ...(data.keywords || [])])),
     description: hasSeed && old.description ? old.description : (old.description || data.description),
     cover: old.cover || data.cover,
     headerImage: old.headerImage || data.headerImage,

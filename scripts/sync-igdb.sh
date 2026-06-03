@@ -42,7 +42,9 @@ fi
 
 CLI="$(command -v tcb || command -v cloudbase)"
 
-echo "▶ 1/2 本地拉 IGDB（参数：${*:-默认 5 大主机 × 30 款}）"
+echo "▶ 1/2 本地拉 IGDB（参数：${*:-默认 6 大平台 × 100 款}）"
+# 先清理上一次的分批文件，避免误用旧数据
+rm -f .igdb-batch.json .igdb-batch.*.json
 node sync-igdb-local.js "$@"
 
 if [[ ! -s "$BATCH_FILE" ]]; then
@@ -50,9 +52,25 @@ if [[ ! -s "$BATCH_FILE" ]]; then
   exit 1
 fi
 
+# 收集所有批次（按编号顺序）
+# 优先用 .igdb-batch.N.json 多文件模式；否则单文件 .igdb-batch.json
+shopt -s nullglob
+BATCHES=(.igdb-batch.*.json)
+shopt -u nullglob
+if [[ ${#BATCHES[@]} -eq 0 ]]; then
+  BATCHES=("$BATCH_FILE")
+fi
+
+TOTAL=${#BATCHES[@]}
 echo ""
-echo "▶ 2/2 调云函数 syncFromIGDB 入库（env=${ENV_ID}）"
-"$CLI" fn invoke syncFromIGDB --params "$(cat "$BATCH_FILE")" -e "$ENV_ID"
+echo "▶ 2/2 调云函数 syncFromIGDB 入库（${TOTAL} 批，env=${ENV_ID}）"
+
+for i in "${!BATCHES[@]}"; do
+  f="${BATCHES[$i]}"
+  echo ""
+  echo "── 批次 $((i+1))/${TOTAL}: ${f}"
+  "$CLI" fn invoke syncFromIGDB --params "$(cat "$f")" -e "$ENV_ID"
+done
 
 echo ""
-echo "✅ 全部完成"
+echo "✅ 全部完成（共 ${TOTAL} 批）"

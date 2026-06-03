@@ -83,11 +83,11 @@ async function handleSearch(event) {
   };
   const sortConfig = SORT_MAP[sort] || SORT_MAP.rating;
 
-  // 多字段模糊匹配：name / nameEn / tags（数组内包含）
+  // 多字段模糊匹配：name / nameEn / tags / keywords（数组内含中文别名等扩展词）
   const query = gamesCol.where(
     _.and([
       { status: 1 },
-      _.or([{ name: reg }, { nameEn: reg }, { tags: reg }]),
+      _.or([{ name: reg }, { nameEn: reg }, { tags: reg }, { keywords: reg }]),
     ])
   );
 
