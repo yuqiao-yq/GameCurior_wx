@@ -11,6 +11,19 @@ const gamesCol = db.collection('games');
 // 美元 → 人民币 汇率（简易，可后续接实时汇率接口）
 const USD_TO_CNY = 7.2;
 
+// ============ URL 脱敏：仅打印 host + path + 非敏感 query，避免 API key 进日志 ============
+function safeUrl(url) {
+  try {
+    const u = new URL(url);
+    const allowed = ['storeID', 'pageSize', 'sortBy', 'title', 'id'];
+    const kept = [];
+    u.searchParams.forEach((v, k) => { if (allowed.includes(k)) kept.push(`${k}=${v}`); });
+    return `${u.origin}${u.pathname}${kept.length ? '?' + kept.join('&') : ''}`;
+  } catch (e) {
+    return url.split('?')[0];
+  }
+}
+
 // ============ HTTP GET ============
 function httpGet(url, timeout = 15000) {
   return new Promise((resolve, reject) => {
@@ -160,7 +173,7 @@ exports.main = async (event, context) => {
     }).toString();
 
     const url = `https://www.cheapshark.com/api/1.0/deals?${params}`;
-    console.log('[CheapShark] GET', url);
+    console.log('[CheapShark] GET', safeUrl(url));
 
     const list = await httpGet(url);
 

@@ -11,6 +11,20 @@ const gamesCol = db.collection('games');
 
 const RAWG_API_KEY = process.env.RAWG_API_KEY || '';
 
+// ============ URL 脱敏：仅打印 host + path + 非敏感 query，避免 API key 进日志 ============
+function safeUrl(url) {
+  try {
+    const u = new URL(url);
+    // 白名单 query 参数（不含 key / token / secret 等敏感字段）
+    const allowed = ['platforms', 'page_size', 'ordering', 'dates', 'search', 'page'];
+    const kept = [];
+    u.searchParams.forEach((v, k) => { if (allowed.includes(k)) kept.push(`${k}=${v}`); });
+    return `${u.origin}${u.pathname}${kept.length ? '?' + kept.join('&') : ''}`;
+  } catch (e) {
+    return url.split('?')[0]; // 兜底：截掉 query
+  }
+}
+
 // ============ HTTP GET ============
 function httpGet(url, timeout = 20000) {
   return new Promise((resolve, reject) => {
@@ -179,7 +193,7 @@ exports.main = async (event, context) => {
   try {
     if (mode === 'list') {
       const url = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&page_size=${pageSize}&ordering=${ordering}`;
-      console.log('[RAWG] GET', url);
+      console.log('[RAWG] GET', safeUrl(url));
       const json = await httpGet(url);
       const list = json.results || [];
 
@@ -219,7 +233,7 @@ exports.main = async (event, context) => {
         + `&page_size=${pageSize}`
         + `&ordering=${platformOrdering}`
         + `&dates=${dates}`;
-      console.log('[RAWG:platform] GET', url);
+      console.log('[RAWG:platform] GET', safeUrl(url));
       const json = await httpGet(url);
       const list = json.results || [];
 

@@ -61,7 +61,8 @@ async function httpGetWithRetry(url, timeout = 15000, maxRetry = 2) {
     } catch (e) {
       lastErr = e;
       if (i < maxRetry && isRetriable(e)) {
-        console.warn(`[SteamStore] ${e.message}, retry ${i + 1}/${maxRetry}:`, url);
+        // 截掉 query 避免长 URL 噪声；Steam Store 无 API key 但保持各 sync 函数日志风格一致
+        console.warn(`[SteamStore] ${e.message}, retry ${i + 1}/${maxRetry}:`, url.split('?')[0]);
         await sleep(800 * (i + 1));
         continue;
       }
