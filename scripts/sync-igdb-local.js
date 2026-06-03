@@ -22,11 +22,10 @@
 //
 // 平台 ID：Switch=130 / PS5=167 / PS4=48 / Xbox Series=169 / Xbox One=49 / PC=6
 //
-// 全流程：
+// 全流程（一键脚本：./scripts/sync-igdb.sh）：
 //   1. node scripts/sync-igdb-local.js --platforms=130 --limit=3
 //      → 产出 scripts/.igdb-batch.json
-//   2. cd /Users/zhuyuqiao/Documents/code/GameCurior_wx
-//      cloudbase functions:invoke syncFromIGDB \
+//   2. tcb fn invoke syncFromIGDB \
 //        --params "$(cat scripts/.igdb-batch.json)" \
 //        -e cloud1-8g8jrsgc94538121
 //   3. 看返回 { inserted: N, updated: M, failed: 0 } 即成功
@@ -179,12 +178,11 @@ async function main() {
 
   console.log(`\n✅ 共 ${allGames.length} 条游戏数据，已写入 ${OUT_PATH}`);
   console.log(`\n🚀 下一步：调云函数入库\n`);
-  console.log(`   cloudbase functions:invoke syncFromIGDB \\`);
+  console.log(`   tcb fn invoke syncFromIGDB \\`);
   console.log(`     --params "$(cat ${path.relative(process.cwd(), OUT_PATH)})" \\`);
   console.log(`     -e <你的环境 ID>`);
-  console.log(`\n   或者一键管道：`);
-  console.log(`   cloudbase functions:invoke syncFromIGDB --params "$(cat ${path.relative(process.cwd(), OUT_PATH)})"`);
-  console.log(`\n   首次使用需要先：cloudbase login（微信扫码）`);
+  console.log(`\n   💡 推荐用一键脚本完成上述两步：./scripts/sync-igdb.sh`);
+  console.log(`\n   首次使用需先：npm install -g @cloudbase/cli && cloudbase login`);
 }
 
 main().catch((err) => {
