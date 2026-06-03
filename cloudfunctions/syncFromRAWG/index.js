@@ -201,6 +201,46 @@ exports.main = async (event, context) => {
       return { code: 0, message: 'ok', data: { source: 'rawg', mode, ...stats } };
     }
 
+    // ============ mode='platform'：按平台拉榜单 ============
+    // 用于补全主机平台（Switch / PS5 / PS4 / Xbox Series / Xbox One）的代表作
+    // RAWG 平台 ID：Switch=7、PS5=187、PS4=18、Xbox Series=186、Xbox One=1
+    // 排序用 -added（RAWG 用户收藏数）而非 -metacritic：主机新游可能没媒体评分会被漏
+    if (mode === 'platform') {
+      const { platformId } = event;
+      if (!platformId) {
+        return { code: 1003, message: 'mode=platform 必须提供 platformId', data: null };
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      const dates = event.dates || `2023-01-01,${today}`;
+      const platformOrdering = event.ordering || '-added';
+
+      const url = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}`
+        + `&platforms=${platformId}`
+        + `&page_size=${pageSize}`
+        + `&ordering=${platformOrdering}`
+        + `&dates=${dates}`;
+      console.log('[RAWG:platform] GET', url);
+      const json = await httpGet(url);
+      const list = json.results || [];
+
+      const stats = { total: list.length, inserted: 0, updated: 0, failed: 0, failures: [] };
+      for (const item of list) {
+        try {
+          // 列表字段不全，再请求详情拿描述
+          const detail = await httpGet(`https://api.rawg.io/api/games/${item.id}?key=${RAWG_API_KEY}`);
+          const merged = { ...item, ...detail };
+          const normalized = normalize(merged);
+          const result = await upsertGame(normalized);
+          stats[result]++;
+        } catch (e) {
+          stats.failed++;
+          stats.failures.push({ name: item.name, error: e.message });
+        }
+      }
+
+      return { code: 0, message: 'ok', data: { source: 'rawg', mode, platformId, ...stats } };
+    }
+
     if (mode === 'enrich') {
       // 补全已有游戏：找出未被 rawg 同步过的，按名字查 RAWG
       const { data: pending } = await gamesCol

@@ -29,8 +29,9 @@
 | [`initBanners/`](./initBanners) | 内置种子 | ❌ | 一键导入 4 条示例首页 banner（榜单跳转入口） |
 | [`syncFromSteamSpy/`](./syncFromSteamSpy) | [SteamSpy](https://steamspy.com/api.php) | ❌ | 拉取 Steam 热门游戏（销量、评分） |
 | [`syncFromCheapShark/`](./syncFromCheapShark) | [CheapShark](https://apidocs.cheapshark.com) | ❌ | 实时打折信息 |
-| [`syncFromRAWG/`](./syncFromRAWG) | [RAWG.io](https://rawg.io/apidocs) | ✅ 免费 | 截图、视频、标签、详细元数据 |
-| [`syncAllSources/`](./syncAllSources) | 全部 | - | **一键聚合调度** |
+| [`syncFromRAWG/`](./syncFromRAWG) | [RAWG.io](https://rawg.io/apidocs) | ✅ 免费 | 截图、视频、标签、详细元数据；含 `mode:'platform'` 按平台拉主机榜单（Switch/PS/Xbox） |
+| [`syncFromIGDB/`](./syncFromIGDB) | [IGDB (Twitch)](https://api-docs.igdb.com/) | ✅ 免费 | 主机平台 + 冷门 / 日韩独占游戏兜底（元数据最权威） |
+| [`syncAllSources/`](./syncAllSources) | 全部 | - | **一键聚合调度**（含 5 个主机平台 + IGDB 兜底） |
 
 ---
 
@@ -105,6 +106,7 @@ cd cloudfunctions/initGames && npm install
 cd cloudfunctions/syncFromSteamSpy && npm install
 cd cloudfunctions/syncFromCheapShark && npm install
 cd cloudfunctions/syncFromRAWG && npm install
+cd cloudfunctions/syncFromIGDB && npm install
 cd cloudfunctions/syncFromSteamStore && npm install
 cd cloudfunctions/syncAllSources && npm install
 ```
@@ -129,6 +131,7 @@ cd cloudfunctions/syncAllSources && npm install
 | `history` | 仅创建者可读写 |
 | `gameLists` | 仅创建者可读写（首次使用 gameList 云函数会自动创建） |
 | `gameListItems` | 仅创建者可读写（首次使用 gameList 云函数会自动创建） |
+| `kvCache` | 仅管理端可读写（IGDB token 缓存等服务端 KV） |
 
 > 💡 **gameLists / gameListItems 自动创建**：这两个集合若不存在，[`gameList`](./gameList) 和 [`gameListItem`](./gameListItem) 云函数会在首次调用时自动 createCollection。但需要手动在控制台**确认权限规则**为「仅创建者可读写」，否则可能读到他人数据。
 
@@ -146,6 +149,20 @@ cd cloudfunctions/syncAllSources && npm install
 
 1. 注册 https://rawg.io/apidocs 获取免费 API Key（每月 20,000 次调用配额）
 2. 云开发控制台 → 云函数 → `syncFromRAWG` → 配置 → **环境变量** → 新增 `RAWG_API_KEY=你的key`
+
+### 6. （可选）配置 IGDB Twitch Credentials
+
+IGDB 是 Twitch 旗下的游戏数据库，覆盖最全（含主机独占 + 日韩游戏），元数据最权威。
+
+1. 打开 https://dev.twitch.tv/console/apps → **Register Your Application**
+   - Name: 任意（如 `GameCurior IGDB`）
+   - OAuth Redirect URLs: `http://localhost`（IGDB 用 client_credentials 流，不实际跳转）
+   - Category: `Application Integration`
+2. 创建后拿到 `Client ID`，点 **New Secret** 拿到 `Client Secret`
+3. 云开发控制台 → 云函数 → `syncFromIGDB` → 配置 → **环境变量** 新增两条：
+   - `TWITCH_CLIENT_ID=你的 client id`
+   - `TWITCH_CLIENT_SECRET=你的 client secret`
+4. 云函数会自动用这两个凭证换 access_token（~60 天有效），缓存在 `kvCache` 集合，到期前自动续期
 
 ---
 
@@ -214,9 +231,10 @@ flowchart LR
 | 字段 | 优先级 |
 |---|---|
 | 中文名 / 中文描述 | seed（initGames） > 不覆盖 |
-| 价格 / 折扣 | CheapShark（实时） > SteamSpy > seed |
-| 评分 / 销量 | SteamSpy > seed |
-| 截图 / 视频 / 标签 | RAWG > seed > SteamSpy |
+| 价格 / 折扣 | CheapShark（实时） > SteamStore > SteamSpy > seed；IGDB 不写价格 |
+| 评分 / 销量 | `Math.max(已有, 新值)`（IGDB / SteamSpy 都参与） |
+| 截图 / 视频 / 标签 | IGDB（最权威） > RAWG > seed > SteamSpy |
+| 主机平台数据 | IGDB > RAWG（按平台榜单同步） |
 | 用户产出（收藏、浏览） | 永远不覆盖 |
 
 每个游戏的 `dataSources` 字段会记录所有同步过的源，`lastSyncedAt` 记录各源最后同步时间，便于排查。
@@ -230,7 +248,10 @@ flowchart LR
 | 云函数报「DATABASE_PERMISSION_DENIED」 | 在云开发控制台为对应集合开放写权限 |
 | SteamSpy/CheapShark 超时 | 国内云函数访问境外有时不稳，重试即可 |
 | RAWG 报「未配置 RAWG_API_KEY」 | 见第 5 步配置环境变量 |
+| IGDB 报「未配置 TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET」 | 见第 6 步配置环境变量 |
+| IGDB 报 401 Unauthorized | token 缓存可能过期或失效，到云数据库 `kvCache` 集合手动删除 `igdb_token` 文档后重跑会自动重新申请 |
 | 中文名被覆盖了 | 检查游戏的 `dataSources` 是否包含 `seed` |
+| 主机游戏（Switch/PS5）库里没有 | 需先跑 `syncFromRAWG mode:'platform'` + `syncFromIGDB`，或直接调 `syncAllSources` |
 
 ---
 

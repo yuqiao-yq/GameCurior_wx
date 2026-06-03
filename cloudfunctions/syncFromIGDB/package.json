@@ -1,0 +1,9 @@
+{
+  "name": "syncFromIGDB",
+  "version": "1.0.0",
+  "description": "从 IGDB (Twitch) 同步主机平台 + 冷门 / 日韩独占游戏数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

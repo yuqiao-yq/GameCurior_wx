@@ -20,8 +20,20 @@ const SYNC_PIPELINE = [
   // SteamStore 是主力数据源，限制为 3 个 / 次，多跑几次能逐步覆盖
   // 太大会让单个 sync 函数 60s 跑不完（每个 appid 最坏含重试要 30+s）
   { name: 'syncFromSteamStore', params: { limit: 3, delayMs: 500 } },
-  // RAWG 需要 API Key，未配置时跳过
+  // RAWG enrich：补全已有游戏的元数据（截图/视频/标签）
   { name: 'syncFromRAWG', params: { mode: 'enrich', pageSize: 10 } },
+  // ===== 主机平台榜单（RAWG）=====
+  // RAWG 平台 ID：Switch=7 / PS5=187 / PS4=18 / Xbox Series=186 / Xbox One=1
+  // ordering 用 -added（用户收藏数）而非 -metacritic：避免主机新游因无媒体评分被漏
+  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 7,   pageSize: 20, ordering: '-added' } }, // Switch
+  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 187, pageSize: 20, ordering: '-added' } }, // PS5
+  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 18,  pageSize: 20, ordering: '-added' } }, // PS4
+  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 186, pageSize: 20, ordering: '-added' } }, // Xbox Series
+  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 1,   pageSize: 20, ordering: '-added' } }, // Xbox One
+  // ===== IGDB 兜底（冷门 / 日韩独占）=====
+  // IGDB 平台 ID：Switch=130 / PS5=167 / PS4=48 / Xbox Series=169 / Xbox One=49
+  // 函数内部循环 5 个平台，一次调用搞定，避免再加 5 行调度
+  { name: 'syncFromIGDB', params: { platforms: [130, 167, 48, 169, 49], limitPerPlatform: 30 } },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -65,8 +77,8 @@ exports.main = async (event, context) => {
         params: step.params,
       });
 
-      // 间隔 800ms 避免同时启动多个云函数（限并发）
-      await sleep(800);
+      // 间隔 1500ms 避免同时启动多个云函数（含同函数多次触发，如 syncFromRAWG 跑 6 次会撞 SCF 单函数并发上限）
+      await sleep(1500);
     } catch (err) {
       console.error(`[syncAllSources] [${step.name}] 同步触发异常:`, err.message);
       triggered.push({

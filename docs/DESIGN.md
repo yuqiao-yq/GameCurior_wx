@@ -355,12 +355,14 @@ exports.main = async (event, context) => {
 
 #### 数据源矩阵
 
-| 数据源 | 是否需 Key | 主要贡献字段 | 同步频率 |
-|---|---|---|---|
-| **内置种子**（`initGames`） | ❌ | 中文名、中文描述、分类 | 一次性，仅在新增游戏时 |
-| **SteamSpy** | ❌ | 销量、好评率、综合评分 | 每周 1 次 |
-| **CheapShark** | ❌ | 实时价格、折扣、商店链接 | 每天 1 次 |
-| **RAWG.io** | ✅ 免费 | 截图、视频、详细标签、元数据 | 按需触发 |
+| 数据源 | 是否需 Key | 主要贡献字段 | 平台覆盖 | 同步频率 |
+|---|---|---|---|---|
+| **内置种子**（`initGames`） | ❌ | 中文名、中文描述、分类 | Steam 主 | 一次性，仅在新增游戏时 |
+| **SteamSpy** | ❌ | 销量、好评率、综合评分 | Steam | 每周 1 次（腾讯云 IP 被 Cloudflare 拦截，已部分失效） |
+| **SteamStore** | ❌ | Steam 详细字段（语言/Metacritic/截图） | Steam | 每天 1 次（限速 3 个/次） |
+| **CheapShark** | ❌ | 实时价格、折扣、商店链接 | PC 多商店 | 每天 1 次 |
+| **RAWG.io** | ✅ 免费 | 截图、视频、详细标签、元数据；按平台拉主机榜单 | **全平台**（PS/Xbox/Switch/PC/移动） | 按需触发 + 5 平台日榜 |
+| **IGDB (Twitch)** | ✅ 免费 | 主机独占 + 冷门 / 日韩游戏兜底，元数据最权威 | **全平台**，含日韩独占 | 每天 1 次（5 平台合一） |
 
 #### 数据流图
 
@@ -368,31 +370,39 @@ exports.main = async (event, context) => {
 flowchart LR
     subgraph Sources["数据源（外部）"]
         Seed[(内置种子<br/>25 款精选)]
-        SteamSpy[SteamSpy API<br/>免 key]
-        CheapShark[CheapShark API<br/>免 key]
-        RAWG[RAWG.io API<br/>需 key]
+        SteamSpy[SteamSpy API<br/>免 key / Steam]
+        SteamStore[Steam Store API<br/>免 key / Steam]
+        CheapShark[CheapShark API<br/>免 key / PC]
+        RAWG[RAWG.io API<br/>需 key / 全平台]
+        IGDB[IGDB API<br/>需 Twitch credentials / 全平台]
     end
 
     subgraph SyncCF["同步云函数"]
         F1[initGames]
         F2[syncFromSteamSpy]
+        F2b[syncFromSteamStore]
         F3[syncFromCheapShark]
-        F4[syncFromRAWG]
+        F4[syncFromRAWG<br/>list/enrich/platform]
+        F5[syncFromIGDB<br/>5 主机平台]
         F0[syncAllSources<br/>聚合调度]
     end
 
     subgraph Storage["存储"]
         DB[(games 集合)]
+        KV[(kvCache<br/>IGDB token)]
     end
 
     Cron[定时触发器<br/>每天 3 AM] --> F0
 
     Seed --> F1 --> DB
     SteamSpy --> F2 --> DB
+    SteamStore --> F2b --> DB
     CheapShark --> F3 --> DB
     RAWG --> F4 --> DB
+    IGDB --> F5 --> DB
+    F5 -.token 缓存.-> KV
 
-    F0 --> F1 & F2 & F3 & F4
+    F0 --> F1 & F2 & F2b & F3 & F4 & F5
 ```
 
 #### 字段合并策略
@@ -402,9 +412,10 @@ flowchart LR
 | 字段 | 合并优先级 |
 |---|---|
 | 中文名 / 中文描述 | `initGames > 不覆盖` |
-| 价格 / 折扣 | `CheapShark > SteamSpy > Seed` |
-| 评分 / 销量 | `SteamSpy > Seed` |
-| 截图 / 视频 / 标签 | `RAWG > Seed > SteamSpy` |
+| 价格 / 折扣 | `CheapShark > SteamStore > SteamSpy > Seed`；**IGDB 不写价格**（避免误清空） |
+| 评分 / 销量 | `Math.max(已有, 新值)`（IGDB / SteamSpy 都参与，取高分） |
+| 截图 / 视频 / 标签 | `IGDB（最权威） > RAWG > Seed > SteamSpy` |
+| 主机平台数据 | `IGDB > RAWG`（按平台榜单同步：Switch/PS5/PS4/XboxS/Xbox1） |
 | 用户产出（收藏、浏览） | **永远不被同步覆盖** |
 
 #### 文档元数据
@@ -413,12 +424,19 @@ flowchart LR
 
 ```js
 {
-  dataSources: ['seed', 'steamspy', 'cheapshark'],  // 来源追踪
+  dataSources: ['seed', 'steamspy', 'steamstore', 'cheapshark', 'rawg', 'igdb'],  // 来源追踪
   lastSyncedAt: {
     seed: Date,
     steamspy: Date,
+    steamstore: Date,
     cheapshark: Date,
     rawg: Date,
+    igdb: Date,
+  },
+  externalIds: {
+    steam: '1145360',     // SteamStore / SteamSpy / CheapShark 去重锚
+    rawg: '54',           // RAWG 兜底去重
+    igdb: '5328',         // IGDB 兜底去重
   },
 }
 ```
