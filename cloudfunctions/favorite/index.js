@@ -128,6 +128,15 @@ exports.main = async (event, context) => {
         };
       }
 
+      // ============ 收藏总数（用于"我的"页统计） ============
+      case 'count': {
+        const { status: filterStatus } = event;
+        const where = { _openid: OPENID };
+        if (typeof filterStatus === 'number') where.status = filterStatus;
+        const { total } = await favoritesCol.where(where).count();
+        return { code: 0, message: 'ok', data: { total } };
+      }
+
       // ============ 我的收藏列表 ============
       case 'list': {
         const { page = 1, pageSize = 20, status: filterStatus } = event;

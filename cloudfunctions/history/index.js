@@ -21,6 +21,8 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'list':
         return await handleList(event, OPENID);
+      case 'count':
+        return await handleCount(OPENID);
       case 'clear':
         return await handleClear(OPENID);
       case 'remove':
@@ -100,6 +102,12 @@ async function handleList(event, openid) {
       hasMore: histories.length === pageSize,
     },
   };
+}
+
+// ============ count：浏览历史总数（用于"我的"页统计） ============
+async function handleCount(openid) {
+  const { total } = await historyCol.where({ _openid: openid }).count();
+  return { code: 0, message: 'ok', data: { total } };
 }
 
 // ============ clear：清空全部浏览历史 ============

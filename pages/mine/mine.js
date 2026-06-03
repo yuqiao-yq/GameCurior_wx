@@ -64,20 +64,20 @@ Page({
     }
   },
 
+  // 并发拉收藏数 + 浏览历史数（各自失败互不影响）
   async fetchStats() {
-    try {
-      const data = await cloud.callFunction(
-        'favorite',
-        { action: 'list', pageSize: 1 }, // 只是为了拿总数标记，list 已经够用
-        { showError: false }
-      );
-      // 简化：暂时只显示是否有收藏
-      this.setData({
-        'stats.favCount': (data.list && data.list.length) || 0,
-      });
-    } catch (e) {
-      console.warn('fetchStats fail:', e);
-    }
+    const tasks = [
+      cloud.callFunction('favorite', { action: 'count' }, { showError: false })
+        .then((d) => ({ key: 'favCount', val: (d && d.total) || 0 }))
+        .catch(() => ({ key: 'favCount', val: 0 })),
+      cloud.callFunction('history', { action: 'count' }, { showError: false })
+        .then((d) => ({ key: 'historyCount', val: (d && d.total) || 0 }))
+        .catch(() => ({ key: 'historyCount', val: 0 })),
+    ];
+    const results = await Promise.all(tasks);
+    const patch = {};
+    results.forEach((r) => { patch[`stats.${r.key}`] = r.val; });
+    this.setData(patch);
   },
 
   // 跳收藏列表
