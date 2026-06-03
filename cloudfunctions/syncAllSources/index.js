@@ -20,17 +20,17 @@ const SYNC_PIPELINE = [
   // SteamStore 是主力数据源，限制为 3 个 / 次，多跑几次能逐步覆盖
   // 太大会让单个 sync 函数 60s 跑不完（每个 appid 最坏含重试要 30+s）
   { name: 'syncFromSteamStore', params: { limit: 3, delayMs: 500 } },
-  // RAWG enrich：补全已有游戏的元数据（截图/视频/标签）
-  { name: 'syncFromRAWG', params: { mode: 'enrich', pageSize: 10 } },
-  // ===== 主机平台榜单（RAWG）=====
-  // RAWG 平台 ID：Switch=7 / PS5=187 / PS4=18 / Xbox Series=186 / Xbox One=1
-  // ordering 用 -added（用户收藏数）而非 -metacritic：避免主机新游因无媒体评分被漏
-  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 7,   pageSize: 20, ordering: '-added' } }, // Switch
-  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 187, pageSize: 20, ordering: '-added' } }, // PS5
-  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 18,  pageSize: 20, ordering: '-added' } }, // PS4
-  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 186, pageSize: 20, ordering: '-added' } }, // Xbox Series
-  { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 1,   pageSize: 20, ordering: '-added' } }, // Xbox One
-  // ===== IGDB 兜底（冷门 / 日韩独占）=====
+  // ⚠️ RAWG 全部暂时禁用：api.rawg.io 走 Cloudflare 节点（108.160.170.26）国内不可达
+  //    本地 + 腾讯云函数出口都 Destination Host Unreachable，非代码可解
+  //    后续若有海外节点 / 代理通道可恢复（取消下方 6 行注释 + 启用 syncFromRAWG 部署）
+  //
+  // { name: 'syncFromRAWG', params: { mode: 'enrich', pageSize: 10 } },
+  // { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 7,   pageSize: 20, ordering: '-added' } }, // Switch
+  // { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 187, pageSize: 20, ordering: '-added' } }, // PS5
+  // { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 18,  pageSize: 20, ordering: '-added' } }, // PS4
+  // { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 186, pageSize: 20, ordering: '-added' } }, // Xbox Series
+  // { name: 'syncFromRAWG', params: { mode: 'platform', platformId: 1,   pageSize: 20, ordering: '-added' } }, // Xbox One
+  // ===== IGDB（主机平台 + 冷门 / 日韩独占）=====
   // IGDB 平台 ID：Switch=130 / PS5=167 / PS4=48 / Xbox Series=169 / Xbox One=49
   // 函数内部循环 5 个平台，一次调用搞定，避免再加 5 行调度
   { name: 'syncFromIGDB', params: { platforms: [130, 167, 48, 169, 49], limitPerPlatform: 30 } },

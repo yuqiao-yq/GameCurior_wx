@@ -251,7 +251,8 @@ flowchart LR
 | IGDB 报「未配置 TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET」 | 见第 6 步配置环境变量 |
 | IGDB 报 401 Unauthorized | token 缓存可能过期或失效，到云数据库 `kvCache` 集合手动删除 `igdb_token` 文档后重跑会自动重新申请 |
 | 中文名被覆盖了 | 检查游戏的 `dataSources` 是否包含 `seed` |
-| 主机游戏（Switch/PS5）库里没有 | 需先跑 `syncFromRAWG mode:'platform'` + `syncFromIGDB`，或直接调 `syncAllSources` |
+| 主机游戏（Switch/PS5）库里没有 | 需先跑 `syncFromIGDB`，或直接调 `syncAllSources`；RAWG 暂禁用 |
+| RAWG 调用 `request timeout` / `Destination Host Unreachable` | RAWG 走 Cloudflare 节点（如 `108.160.170.26`）国内不可达，本地 + 腾讯云函数出口同样断；已在 `syncAllSources` 注释禁用，留待后续海外代理通道接入 |
 
 ---
 
